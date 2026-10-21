@@ -29,7 +29,7 @@ test("rented apartment and tenant information persist in a building for sale", a
   const doc = new Property(input);
   await doc.validate();
   doc.createdAt = new Date(); doc.updatedAt = new Date();
-  const result = serializeProperty(doc);
+  const result = serializeProperty(doc, true);
   assert.equal(result.units[0].isRented, true);
   assert.equal(result.units[0].tenant?.name, "Example tenant");
   assert.equal(result.units[0].number, "104");
@@ -48,5 +48,5 @@ test("older rental apartments infer occupancy from existing tenant information",
   const doc = new Property({ ...listing, listingType: "rent", rentalPeriod: "monthly", units: [{ name: "Legacy apartment", tenant: { name: "Example tenant" } }] });
   await doc.validate();
   doc.createdAt = new Date(); doc.updatedAt = new Date();
-  assert.equal(serializeProperty(doc).units[0].isRented, true);
+  assert.equal(serializeProperty(doc, true).units[0].isRented, true);
 });

@@ -1,3 +1,4 @@
+import { consumeLoginAttempt } from "./login-throttle";
 import type { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -49,6 +50,7 @@ export const authOptions: AuthOptions = {
           throw new Error("Could not reach the database. Please try again shortly.");
         }
 
+        if (!await consumeLoginAttempt(identifier.includes("@") ? identifier.toLowerCase() : phone!)) return null;
         const user = await User.findOne(identifier.includes("@") ? { email: identifier.toLowerCase() } : { phone });
         if (!user || !user.active) return null;
 
@@ -73,9 +75,19 @@ export const authOptions: AuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as UserRole;
+      // Recheck on every server session read: logout-by-deactivation and role
+      // changes take effect without waiting for the signed JWT to expire.
+      try {
+        await connectToDatabase();
+        const current = token.id ? await User.findById(token.id).select("name email role active") : null;
+        if (!current?.active || !["admin", "real_estate_officer", "sales_officer", "project_manager"].includes(current.role)) {
+          session.user = undefined as never;
+          return session;
+        }
+        session.user = { id: current._id.toString(), role: current.role, name: current.name, email: current.email };
+      } catch {
+        // A database outage must never grant stale privileges.
+        session.user = undefined as never;
       }
       return session;
     },

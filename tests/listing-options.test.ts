@@ -28,7 +28,7 @@ test("URL-only locations and installed AC survive database serialization", async
   await doc.validate();
   doc.createdAt = new Date();
   doc.updatedAt = new Date();
-  const result = serializeProperty(doc);
+  const result = serializeProperty(doc, true);
   assert.equal(result.location?.mapUrl, input.location?.mapUrl);
   assert.equal(result.location?.city, undefined);
   assert.equal(result.details?.acInstalled, true);
@@ -62,7 +62,7 @@ test("property types and offer source survive storage and serialization", async 
     const doc = new Property({ ...parsed, broughtBy: { userId, name: "Ali" } });
     await doc.validate();
     doc.createdAt = doc.updatedAt = new Date();
-    const saved = serializeProperty(doc);
+    const saved = serializeProperty(doc, true);
     assert.equal(saved.propertyType, propertyType);
     assert.deepEqual(saved.broughtBy, { userId, name: "Ali" });
   }

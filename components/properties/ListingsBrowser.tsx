@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo, Suspense } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { readListingUrl, writeListingUrl } from "@/lib/listing-url";
 import { useSession } from "next-auth/react";
 import { PropertiesMap } from "./PropertiesMap";
 import { Icon } from "@/components/ui/Icon";
@@ -22,7 +24,11 @@ const LISTINGS_ROLES: UserRole[] = ["admin", "real_estate_officer", "project_man
  * locked and hidden from the FilterBar rather than duplicating this whole
  * page three times.
  */
-export function ListingsBrowser({
+export function ListingsBrowser(props: { fixedCategory?: Category; eyebrowKey: string; titleKey: string; subtitleKey: string }) {
+  return <Suspense fallback={<LoadingGrid count={6} />}><ListingsBrowserContent {...props} /></Suspense>;
+}
+
+function ListingsBrowserContent({
   fixedCategory,
   eyebrowKey,
   titleKey,
@@ -36,16 +42,17 @@ export function ListingsBrowser({
   const { t } = useLanguage();
   const { data: session } = useSession();
   const canAddListing = Boolean(session?.user.role && LISTINGS_ROLES.includes(session.user.role));
-  const [filters, setFilters] = useState<FilterState>({
-    search: "",
-    category: fixedCategory ?? "",
-    listingType: "",
-    status: "available",
-    residencyType: "",
-    sortBy: "createdAt",
-    sortDir: "desc",
-  });
-  const [page, setPage] = useState(1);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const query = searchParams.toString();
+  const { filters, page } = useMemo(() => readListingUrl(new URLSearchParams(query), fixedCategory), [query, fixedCategory]);
+  function navigate(next: FilterState, nextPage: number, replace = false) {
+    const qs = writeListingUrl(new URLSearchParams(query), next, nextPage, fixedCategory);
+    const url = `${pathname}${qs ? `?${qs}` : ""}${window.location.hash}`;
+    if (url === `${window.location.pathname}${window.location.search}${window.location.hash}`) return;
+    if (replace) window.history.replaceState(null, "", url); else window.history.pushState(null, "", url);
+  }
+  function setPage(next: number) { navigate(filters, next); }
   const results = useRef<HTMLDivElement>(null);
   const pageSize = 12;
   const [properties, setProperties] = useState<PropertyDTO[]>([]);
@@ -92,8 +99,7 @@ export function ListingsBrowser({
         <FilterBar
           value={filters}
           onChange={next => {
-            setPage(1);
-            setFilters(next.category === "land" ? { ...next, listingType: "", residencyType: "", propertyType: "", rooms: "" } : next);
+            navigate(next, 1);
           }}
           hideCategory={Boolean(fixedCategory)}
           hideResidencyType={fixedCategory === "land" || !session?.user}

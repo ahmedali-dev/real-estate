@@ -1,3 +1,4 @@
+import { dashboardFilterKeys } from "@/lib/dashboard-filters";
 import type { PropertyDTO, PropertyListResponse } from "@/types/property";
 import type { FilterState } from "@/components/properties/FilterBar";
 import type { OrderDTO, OrderListResponse, RequestedCategory, OrderStatus } from "@/types/order";
@@ -28,7 +29,8 @@ async function handle<T>(res: Response): Promise<T> {
 
 export function buildQuery(filters: Partial<FilterState> & { page?: number; limit?: number }) {
   const params = new URLSearchParams();
-  for (const key of ["propertyType", "minPrice", "maxPrice", "rooms", "location"] as const) { if (filters[key]) params.set(key, filters[key]!); }
+  for (const key of ["propertyType", "minPrice", "maxPrice", "rooms", "location", "visibility", "hasPrice", "hasImages", "hasTikTok", "hasMap"] as const) { if (filters[key]) params.set(key, filters[key]!); }
+  for (const key of dashboardFilterKeys) { if (filters[key]) params.set(key, filters[key]!); }
   if (filters.search) params.set("search", filters.search);
   if (filters.category) params.set("category", filters.category);
   if (filters.listingType) params.set("listingType", filters.listingType);

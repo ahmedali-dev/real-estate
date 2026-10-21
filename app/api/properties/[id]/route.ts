@@ -28,8 +28,8 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ error: "Listing not found." }, { status: 404 });
     }
 
+    const session = await getServerSession(authOptions);
     if (doc.visibility === "private") {
-      const session = await getServerSession(authOptions);
       if (!session?.user) {
         // Same response as "doesn't exist" — a private listing's existence
         // shouldn't be distinguishable from a wrong ID to a signed-out visitor.
@@ -37,7 +37,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       }
     }
 
-    return NextResponse.json({ data: serializeProperty(doc) }, { status: 200 });
+    return NextResponse.json({ data: serializeProperty(doc, Boolean(session?.user)) }, { status: 200 });
   } catch (err) {
     console.error(`GET /api/properties/${params.id} failed:`, err);
     return NextResponse.json({ error: "Failed to load listing." }, { status: 500 });
@@ -136,7 +136,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: "Listing not found." }, { status: 404 });
     }
 
-    return NextResponse.json({ data: serializeProperty(updated) }, { status: 200 });
+    return NextResponse.json({ data: serializeProperty(updated, true) }, { status: 200 });
   } catch (err) {
     console.error(`PUT /api/properties/${params.id} failed:`, err);
     const message = err instanceof Error ? err.message : "Failed to update listing.";
@@ -198,6 +198,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if ("mapUrl" in data) { if (data.mapUrl) set["location.mapUrl"] = data.mapUrl; else unset["location.mapUrl"] = ""; }
     const updated = await Property.findOneAndUpdate({ _id: params.id, listingType: doc.listingType, category: doc.category }, { $set: set, $unset: unset }, { new: true, runValidators: true });
     if (!updated) return NextResponse.json({ error: "Listing changed. Refresh and try again." }, { status: 409 });
-    return NextResponse.json({ data: serializeProperty(updated) });
+    return NextResponse.json({ data: serializeProperty(updated, true) });
   } catch { return NextResponse.json({ error: "Failed to update listing." }, { status: 500 }); }
 }

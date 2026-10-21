@@ -11,7 +11,7 @@ test("a model cached before offer fields existed is replaced and retains saved o
   const doc = new Property({ title: "Villa listing", category: "apartment", propertyType: "villa", listingType: "sale", description: "A spacious family villa.", broughtBy: { userId: "507f1f77bcf86cd799439011", name: "Khalid" } });
   await doc.validate();
   doc.createdAt = doc.updatedAt = new Date();
-  const result = serializeProperty(doc);
+  const result = serializeProperty(doc, true);
   assert.equal(result.broughtBy?.name, "Khalid");
   assert.equal(result.broughtBy?.userId, "507f1f77bcf86cd799439011");
   assert.equal(result.propertyType, "villa");

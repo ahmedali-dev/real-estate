@@ -345,3 +345,6 @@ body {
 .inline-edit-trigger > svg { color: #647c69; flex-shrink: 0; }
 .inline-edit-trigger:hover { background-color: #e9eee4; }
 .inline-edit-trigger:focus-visible { outline: 2px solid #526d59; outline-offset: 3px; }
+
+.courtyard-filter-options:has(.col-span-full) { max-height: 75vh; overflow-y: auto; overscroll-behavior: contain; }
+@media (max-width: 600px) { .courtyard-filter-options:has(.col-span-full) { max-height: none; overflow: visible; } }

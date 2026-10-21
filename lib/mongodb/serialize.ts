@@ -1,21 +1,21 @@
 import type { PropertyHydrated, ApartmentUnit } from "@/models/Property";
 import type { PropertyDTO } from "@/types/property";
 
-export function serializeProperty(doc: PropertyHydrated): PropertyDTO {
+export function serializeProperty(doc: PropertyHydrated, includeStaffFields = false): PropertyDTO {
   const obj = doc.toObject({ getters: true });
   return {
     _id: obj._id.toString(),
     title: obj.title,
     category: obj.category,
     propertyType: obj.propertyType,
-    broughtBy: obj.broughtBy?.userId ? { userId: obj.broughtBy.userId, name: obj.broughtBy.name } : undefined,
+    broughtBy: includeStaffFields && obj.broughtBy?.userId ? { userId: obj.broughtBy.userId, name: obj.broughtBy.name } : undefined,
     listingType: obj.listingType,
     description: obj.description,
     price: obj.price,
     rentalPeriod: obj.rentalPeriod,
     status: obj.status,
     visibility: obj.visibility,
-    owner: obj.owner
+    owner: includeStaffFields && obj.owner
       ? {
           name: obj.owner.name,
           phone: obj.owner.phone,
@@ -38,10 +38,10 @@ export function serializeProperty(doc: PropertyHydrated): PropertyDTO {
           hasKitchen: obj.details.hasKitchen,
           acInstalled: obj.details.acInstalled,
           kitchenCabinetsInstalled: obj.details.kitchenCabinetsInstalled,
-          residencyType: obj.details.residencyType,
+          residencyType: includeStaffFields ? obj.details.residencyType : undefined,
         }
       : undefined,
-    tenant: obj.tenant
+    tenant: includeStaffFields && obj.tenant
       ? {
           name: obj.tenant.name,
           idNumber: obj.tenant.idNumber,
@@ -56,9 +56,9 @@ export function serializeProperty(doc: PropertyHydrated): PropertyDTO {
       bathrooms: u.bathrooms,
       hasKitchen: u.hasKitchen,
       kitchenCabinetsInstalled: u.kitchenCabinetsInstalled,
-      electricityNumber: u.electricityNumber,
-      residencyType: u.residencyType,
-      tenant: u.tenant
+      electricityNumber: includeStaffFields ? u.electricityNumber : undefined,
+      residencyType: includeStaffFields ? u.residencyType : undefined,
+      tenant: includeStaffFields && u.tenant
         ? {
             name: u.tenant.name,
             idNumber: u.tenant.idNumber,

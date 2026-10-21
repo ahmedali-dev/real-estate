@@ -188,7 +188,7 @@ Endpoint access labels used below:
 - **Admin:** `admin` only.
 - **Webhook key:** `X-API-Key` matching the configured `OPENWA_API_KEY`.
 
-Protected browser requests use the NextAuth session cookie, not a custom bearer token. Authorization is enforced by API handlers. Owner/tenant information is displayed to signed-in staff in the UI; do not treat UI visibility alone as a guarantee of API field redaction.
+Protected browser requests use the NextAuth session cookie, not a custom bearer token. Authorization is enforced by API handlers. Public API responses and server-rendered property payloads omit owner/tenant information, meter numbers, suitability, and offer attribution. Staff serialization explicitly includes these fields. Session reads revalidate account activation and current roles against MongoDB; sign-in is limited to 10 attempts per normalized identifier per 10-minute window.
 
 ## API endpoints
 

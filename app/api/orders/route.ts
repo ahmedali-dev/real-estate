@@ -1,3 +1,4 @@
+import { literalSearch } from "@/lib/search";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb/connect";
 import { Order } from "@/models/Order";
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
     const category = searchParams.get("category");
-    const search = searchParams.get("search")?.trim();
+    const search = literalSearch(searchParams.get("search"));
     const page = Math.max(1, Number(searchParams.get("page") ?? 1));
     const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit") ?? 50)));
 

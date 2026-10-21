@@ -1,3 +1,5 @@
+import { dashboardFilterConditions } from "@/lib/dashboard-filters";
+import { literalSearch } from "@/lib/search";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/authOptions";
@@ -27,9 +29,8 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get("category");
     const listingType = searchParams.get("listingType");
     const status = searchParams.get("status");
-    const residencyType = searchParams.get("residencyType");
     const visibilityParam = searchParams.get("visibility");
-    const search = searchParams.get("search")?.trim();
+    const search = literalSearch(searchParams.get("search"));
     const sortBy = searchParams.get("sortBy") ?? "createdAt";
     const sortDir = searchParams.get("sortDir") === "asc" ? 1 : -1;
     const page = Math.max(1, Number(searchParams.get("page") ?? 1));
@@ -57,6 +58,20 @@ export async function GET(req: NextRequest) {
     // combine with $and — assigning to filter.$or twice would silently
     // clobber the first one instead of combining them.
     const andConditions: Record<string, unknown>[] = [];
+    // Office completeness filters are deliberately unavailable to public requests.
+    if (isStaff) {
+      for (const [parameter, field] of [["hasPrice", "price"], ["hasImages", "images.0"], ["hasTikTok", "tiktokUrl"], ["hasMap", "location.mapUrl"]]) {
+        const choice = searchParams.get(parameter);
+        if (choice !== "yes" && choice !== "no") continue;
+        const present = { [field]: { $exists: true, $nin: [null, ""] } };
+        const absent = { $or: [{ [field]: { $exists: false } }, { [field]: null }, { [field]: "" }] };
+        andConditions.push(choice === "yes" ? present : absent);
+      }
+    }
+    if (isStaff) {
+      try { andConditions.push(...dashboardFilterConditions(searchParams, category)); }
+      catch (error) { if (error instanceof RangeError) return NextResponse.json({ error: error.message }, { status: 400 }); throw error; }
+    }
     if (search) {
       andConditions.push({
         $or: [
@@ -67,22 +82,13 @@ export async function GET(req: NextRequest) {
         ],
       });
     }
-    if (category !== "land" && isStaff && residencyType && ["family", "singles", "women_only"].includes(residencyType)) {
-      // Residency type ("Suitable for") is staff-only info now — a
-      // signed-out visitor can't filter by it any more than they can see
-      // it displayed. An apartment's own details, or any individual unit
-      // inside a build, can carry this classification.
-      andConditions.push({
-        $or: [{ "details.residencyType": residencyType }, { "units.residencyType": residencyType }],
-      });
-    }
     if (category !== "land") {
       const propertyType = searchParams.get("propertyType");
       if (propertyType && ["villa", "apartment", "duplex", "floor", "shop", "other"].includes(propertyType)) {
         andConditions.push(propertyType === "apartment" ? { category: "apartment", $or: [{ propertyType: "apartment" }, { propertyType: { $exists: false } }] } : { propertyType });
       }
       const rooms = Number(searchParams.get("rooms"));
-      if (Number.isFinite(rooms) && rooms > 0) filter["details.rooms"] = { $gte: rooms };
+      if (!isStaff && Number.isFinite(rooms) && rooms > 0) filter["details.rooms"] = { $gte: rooms };
     }
     const priceRange: Record<string, number> = {};
     for (const [parameter, operator] of [["minPrice", "$gte"], ["maxPrice", "$lte"]]) {
@@ -131,7 +137,7 @@ export async function GET(req: NextRequest) {
     const facet = statsAgg[0] ?? {};
 
     const body: PropertyListResponse = {
-      data: docs.map(serializeProperty),
+      data: docs.map(doc => serializeProperty(doc, isStaff)),
       total,
       stats: {
         total: pick(facet.total),
@@ -218,7 +224,7 @@ export async function POST(req: NextRequest) {
 
     const created = await Property.create(payload);
     return NextResponse.json(
-      { data: serializeProperty(created) },
+      { data: serializeProperty(created, true) },
       { status: 201 }
     );
   } catch (err) {

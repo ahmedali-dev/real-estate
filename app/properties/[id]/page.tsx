@@ -35,12 +35,12 @@ const getVisibleProperty = cache(async (id: string): Promise<PropertyDTO | null>
   const doc = await Property.findById(id);
   if (!doc) return null;
 
+  const session = await getServerSession(authOptions);
   if (doc.visibility === "private") {
-    const session = await getServerSession(authOptions);
     if (!session?.user) return null;
   }
 
-  return serializeProperty(doc);
+  return serializeProperty(doc, Boolean(session?.user));
 });
 
 /**

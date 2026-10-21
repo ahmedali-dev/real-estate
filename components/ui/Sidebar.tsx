@@ -2,7 +2,8 @@
 
 import { Icon, type IconName } from "./Icon";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Suspense } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import type { UserRole } from "@/types/user";
@@ -79,6 +80,30 @@ function NavLink({ item, pathname, onNavigate }: { item: NavItem; pathname: stri
   );
 }
 
+
+function ApartmentNav({ onNavigate }: { onNavigate?: () => void }) {
+  const { t, locale } = useLanguage();
+  const pathname = usePathname();
+  const search = useSearchParams();
+  const active = pathname === "/apartments";
+  const listingType = search.get("listingType");
+  return <details key={active ? "apartments" : "other"} open={active} className="group/apartments">
+    <summary className={`flex cursor-pointer list-none items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition [&::-webkit-details-marker]:hidden ${active ? "bg-ink-800 text-stone-50" : "text-ink-600 hover:bg-ink-50"}`}>
+      <Icon name="home" className="h-5 w-5" />{t("nav.apartments")}<span aria-hidden="true" className="ms-auto transition-transform group-open/apartments:rotate-180">⌄</span>
+    </summary>
+    <div className="ms-5 mt-1 space-y-1 border-s border-ink-100 ps-3">
+      {[
+        { value: "", label: locale === "ar" ? "جميع الشقق" : "All apartments" },
+        { value: "sale", label: t("filters.forSale") },
+        { value: "rent", label: t("filters.forRent") },
+      ].map(item => {
+        const selected = active && (item.value ? listingType === item.value : !["sale", "rent"].includes(listingType || ""));
+        return <Link key={item.value} href={item.value ? `/apartments?listingType=${item.value}` : "/apartments"} onClick={onNavigate} aria-current={selected ? "page" : undefined} className={`block rounded-lg px-3 py-2.5 text-sm transition ${selected ? "bg-moss-100 font-semibold text-moss-600" : "text-ink-500 hover:bg-ink-50 hover:text-ink-800"}`}>{item.label}</Link>;
+      })}
+    </div>
+  </details>;
+}
+
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useLanguage();
   const pathname = usePathname();
@@ -105,7 +130,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
         </p>
         <div className="space-y-1">
           {BROWSE_ITEMS.map((item) => (
-            <NavLink key={item.href} item={item} pathname={pathname} onNavigate={onNavigate} />
+            item.href === "/apartments" ? <Suspense key={item.href} fallback={<NavLink item={item} pathname={pathname} onNavigate={onNavigate} />}><ApartmentNav onNavigate={onNavigate} /></Suspense> : <NavLink key={item.href} item={item} pathname={pathname} onNavigate={onNavigate} />
           ))}
         </div>
       </div>

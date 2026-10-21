@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { Dropdown } from "@/components/ui/Dropdown";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { Icon } from "@/components/ui/Icon";
 import { propertyTextMessage } from "@/lib/property-message";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { PropertyDTO, Visibility } from "@/types/property";
 import { CategoryBadge } from "@/components/properties/CategoryBadge";
 import { ListingTypeBadge } from "@/components/properties/ListingTypeBadge";
@@ -46,7 +47,6 @@ export function ListingsTable({
     if (kind === "show") setShowImages(enabled); else setShareImages(enabled);
     try { localStorage.setItem(`dashboard-${kind}-images`, String(enabled)); } catch { /* Keep the current preference in memory. */ }
   }
-  const selectAll = useRef<HTMLInputElement>(null);
   const shareable = properties.filter(p => p.visibility === "public");
   const chosen = shareable.filter(p => selected.includes(p._id));
   const allSelected = shareable.length > 0 && chosen.length === shareable.length;
@@ -54,7 +54,6 @@ export function ListingsTable({
     const images = shareImages ? p.images.filter(url => { try { return new URL(url).protocol === "https:"; } catch { return false; } }) : [];
     return propertyTextMessage(p, publicOrigin, language) + (images.length ? `\n\n📷 ${language === "ar" ? "صور العقار" : "Property photos"}:\n${images.join("\n")}` : "");
   }).join("\n\n━━━━━━━━━━━━━━━━━━━━\n\n") : "";
-  useEffect(() => { if (selectAll.current) selectAll.current.indeterminate = chosen.length > 0 && !allSelected; }, [chosen.length, allSelected]);
   function toggle(id: string) { setSelected(current => current.includes(id) ? current.filter(value => value !== id) : [...current, id]); }
 
   async function handleVisibilityToggle(p: PropertyDTO, visibility: Visibility) {
@@ -103,15 +102,22 @@ export function ListingsTable({
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div><h2 className="font-semibold text-ink-800">{locale === "ar" ? "حدد العقارات للمشاركة" : "Select properties to share"}</h2><p role="status" className="mt-1 text-sm text-ink-500">{chosen.length} {locale === "ar" ? "عقار محدد" : "selected"}</p></div>
           <div className="flex flex-wrap items-center gap-2">
-            <select aria-label={locale === "ar" ? "لغة الرسالة" : "Message language"} value={language} onChange={e => setLanguage(e.target.value as "ar" | "en")} className="rounded-full border border-ink-100 bg-white px-3 py-2 text-sm"><option value="ar">العربية</option><option value="en">English</option></select>
-            <CopyButton text={message} label={locale === "ar" ? "نسخ العقارات المحددة" : "Copy selected properties"} />
-            {message ? <a href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className="btn-primary"><Icon name="whatsapp" className="h-4 w-4" />{locale === "ar" ? "مشاركة واتساب" : "Share on WhatsApp"}</a> : <button type="button" disabled className="btn-primary opacity-40">{locale === "ar" ? "مشاركة واتساب" : "Share on WhatsApp"}</button>}
-            {chosen.length > 0 && <button type="button" className="btn-secondary" onClick={() => setSelected([])}>{locale === "ar" ? "إلغاء التحديد" : "Clear selection"}</button>}
+            <Dropdown label={locale === "ar" ? `التحديد (${chosen.length})` : `Selection (${chosen.length})`}>
+              <button type="button" disabled={!shareable.length || allSelected} className="btn-secondary" onClick={() => setSelected(shareable.map(p => p._id))}>{locale === "ar" ? "تحديد كل العقارات العامة في الصفحة" : "Select all public listings on this page"}</button>
+              <button type="button" disabled={!shareable.length} className="btn-secondary" onClick={() => setSelected(shareable.filter(p => !selected.includes(p._id)).map(p => p._id))}>{locale === "ar" ? "عكس التحديد في الصفحة" : "Invert selection on this page"}</button>
+              <button type="button" disabled={!chosen.length} className="btn-secondary" onClick={() => setSelected([])}>{locale === "ar" ? "إلغاء التحديد" : "Clear selection"}</button>
+            </Dropdown>
+            <Dropdown label={locale === "ar" ? "المشاركة والنسخ" : "Share & copy"}>
+              <label className="text-xs font-semibold">{locale === "ar" ? "لغة الرسالة" : "Message language"}<select value={language} onChange={e => setLanguage(e.target.value as "ar" | "en")} className="input-field mt-2"><option value="ar">العربية</option><option value="en">English</option></select></label>
+              <CopyButton text={message} label={locale === "ar" ? "نسخ العقارات المحددة" : "Copy selected properties"} />
+              {message ? <a href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className="btn-primary"><Icon name="whatsapp" className="h-4 w-4" />{locale === "ar" ? "مشاركة واتساب" : "Share on WhatsApp"}</a> : <button type="button" disabled className="btn-primary opacity-40">{locale === "ar" ? "مشاركة واتساب" : "Share on WhatsApp"}</button>}
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" role="switch" checked={shareImages} onChange={e => imagePreference("share", e.target.checked)} />{locale === "ar" ? "تضمين روابط الصور" : "Include image links"}</label>
+
+            </Dropdown>
+            <Dropdown label={locale === "ar" ? "خيارات العرض" : "Display options"}>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" role="switch" checked={showImages} onChange={e => imagePreference("show", e.target.checked)} />{locale === "ar" ? "إظهار الصور في الجدول" : "Show table images"}</label>
+            </Dropdown>
           </div>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 border-t border-ink-100 pt-4">
-          <label className="inline-flex cursor-pointer items-center gap-2 text-sm"><input type="checkbox" role="switch" checked={showImages} onChange={e => imagePreference("show", e.target.checked)} className="h-4 w-4 accent-[#526d59]" />{locale === "ar" ? "إظهار الصور في الجدول" : "Show table images"}</label>
-          <label className="inline-flex cursor-pointer items-center gap-2 text-sm"><input type="checkbox" role="switch" checked={shareImages} onChange={e => imagePreference("share", e.target.checked)} className="h-4 w-4 accent-[#526d59]" />{locale === "ar" ? "تضمين روابط الصور عند النسخ والمشاركة" : "Include image links when copying / sharing"}</label>
         </div>
         <p className="mt-3 text-xs text-ink-500">{locale === "ar" ? "حدد من العقارات المعروضة. العقارات الخاصة غير قابلة للمشاركة. اختر المستلم أو المجموعة داخل واتساب." : "Select from the displayed listings. Private properties cannot be shared. Choose the recipient or group in WhatsApp."}</p>
         {!publicOrigin && <p role="alert" className="mt-2 text-sm text-red-700">{locale === "ar" ? "اضبط SITE_URL بعنوان الموقع العام لتفعيل المشاركة." : "Configure SITE_URL with the public website URL to enable sharing."}</p>}
@@ -122,7 +128,7 @@ export function ListingsTable({
         <table className="w-full min-w-[820px] text-start text-sm">
           <thead>
             <tr className="border-b border-ink-100 text-xs uppercase tracking-wide text-ink-400">
-              <th className="px-4 py-3"><input ref={selectAll} type="checkbox" checked={allSelected} disabled={!shareable.length} aria-label={locale === "ar" ? "تحديد كل العقارات العامة المعروضة" : "Select all displayed public properties"} onChange={() => setSelected(allSelected ? [] : shareable.map(p => p._id))} className="h-4 w-4 accent-[#526d59]" /></th>
+              <th className="px-4 py-3 text-start font-semibold"><span className="sr-only">{locale === "ar" ? "تحديد العقار" : "Select property"}</span></th>
               {showImages && <th className="px-4 py-3 text-start font-semibold">{locale === "ar" ? "الصورة" : "Image"}</th>}
               <th className="px-4 py-3 text-start font-semibold">{t("dashboard.table.listing")}</th>
               <th className="px-4 py-3 text-start font-semibold">{t("dashboard.table.category")}</th>
@@ -179,19 +185,11 @@ export function ListingsTable({
                 <td className="px-4 py-3 text-ink-500">{formatLocation(p.location, t)}</td>
                 <td className="px-4 py-3 text-ink-400">{formatDate(p.updatedAt, locale)}</td>
                 <td className="px-4 py-3">
-                  <div className="flex justify-end gap-2">
-                    <Link href={`/dashboard/${p._id}/edit`} className="btn-secondary px-3 py-1.5 text-xs">
-                      {t("common.edit")}
-                    </Link>
-                    {isAdmin && (
-                      <button
-                        onClick={() => setPendingId(p._id)}
-                        className="btn-danger px-3 py-1.5 text-xs"
-                      >
-                        {t("common.delete")}
-                      </button>
-                    )}
-                  </div>
+                  <Dropdown label={t("dashboard.table.actions")}>
+                    <Link href={`/properties/${p._id}`} className="btn-secondary">{locale === "ar" ? "عرض العقار" : "View property"}</Link>
+                    <Link href={`/dashboard/${p._id}/edit`} className="btn-secondary"><Icon name="edit" className="h-4 w-4" />{t("common.edit")}</Link>
+                    {isAdmin && <button type="button" onClick={() => setPendingId(p._id)} className="btn-danger"><Icon name="trash" className="h-4 w-4" />{t("common.delete")}</button>}
+                  </Dropdown>
                 </td>
               </tr>
             ))}
