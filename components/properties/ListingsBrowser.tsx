@@ -39,7 +39,7 @@ function ListingsBrowserContent({
   titleKey: string;
   subtitleKey: string;
 }) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { data: session } = useSession();
   const canAddListing = Boolean(session?.user.role && LISTINGS_ROLES.includes(session.user.role));
   const pathname = usePathname();
@@ -83,29 +83,30 @@ function ListingsBrowserContent({
   }, [filters, load]);
 
   return (
-    <div className="courtyard-browser mx-auto max-w-[1440px] px-4 py-6 sm:py-10 sm:px-6 lg:px-8">
-      <div className="courtyard-hero">
-        <div><p className="courtyard-eyebrow">
-          {t(eyebrowKey)}
-        </p>
-        <h1 className="courtyard-title">
-          {t(titleKey)}
-        </h1>
-        <p className="courtyard-description">{t(subtitleKey)}</p><a href="#properties-map" className="courtyard-map-link">{t("courtyard.mapLink")} ↓</a></div>
-        <div className="courtyard-hero-art" aria-hidden="true"><svg viewBox="0 0 500 320"><rect width="500" height="320" fill="#dee4d4"/><circle cx="396" cy="53" r="30" fill="#f2eccd"/><path d="M0 234 170 200 500 244v90H0Z" fill="#c1cbb5"/><path d="M103 219V103l111-42 173 55v154l-173-27Z" fill="#ebe9dc"/><path d="M214 61v182l173 27V116Z" fill="#cfdbc9"/><path d="M140 119v60l40-12V107ZM250 125v67l40 10v-68ZM322 148v66l39 11v-66Z" fill="#7f9680"/><path d="M132 219v-17l55-13v43ZM267 256v-36l47 11v38Z" fill="#a5b69d"/><path d="M0 278 215 241 500 289" stroke="#f0eedf" strokeWidth="20" fill="none"/></svg><span><Icon name={fixedCategory === "land" ? "land" : fixedCategory === "build" ? "building" : "home"} className="h-5 w-5" />{t("courtyard.snapshot")}</span></div>
-      </div>
-
-      <div className="mb-8">
-        <FilterBar
-          value={filters}
-          onChange={next => {
-            navigate(next, 1);
-          }}
-          hideCategory={Boolean(fixedCategory)}
-          hideResidencyType={fixedCategory === "land" || !session?.user}
-        />
-      </div>
-
+    <div className="courtyard-browser estate-browser">
+      <section className="estate-browse-hero">
+        <div className="estate-browse-container">
+          <p className="estate-eyebrow">{t(eyebrowKey)}</p>
+          <h1>{fixedCategory ? t(titleKey) : locale === "ar" ? "ابحث عن مساحة تناسب حياتك." : "Find a place that feels like yours."}</h1>
+          <p className="estate-hero-description">{fixedCategory ? t(subtitleKey) : locale === "ar" ? "شقق وفلل ومبانٍ وأراضٍ. تفاصيل واضحة وتواصل مباشر مع مكتبنا." : "Apartments, villas, buildings and land. Clear details, direct contact with our office."}</p>
+          <div className="estate-search-panel">
+            {fixedCategory !== "land" && <div className="estate-listing-tabs" aria-label={t("filters.typeLabel")}>{[["", t("filters.saleAndRent")], ["rent", t("filters.forRent")], ["sale", t("filters.forSale")]].map(([value, label]) => <button key={value} type="button" aria-pressed={filters.listingType === value} onClick={() => navigate({ ...filters, listingType: value as FilterState["listingType"] }, 1)}>{label}</button>)}</div>}
+            <FilterBar value={filters} onChange={next => navigate(next, 1)} hideCategory={Boolean(fixedCategory)} hideResidencyType={fixedCategory === "land" || !session?.user} />
+          </div>
+        </div>
+      </section>
+      <div className="estate-browse-container estate-results-container">
+        <div className="estate-results-heading"><div><h2>{t(titleKey)}</h2><p>{status === "ready" ? t("browse.resultsCount", { count: total }) : locale === "ar" ? "جارٍ تحميل العقارات…" : "Loading properties…"}</p></div><div className="estate-view-toggle"><button type="button" onClick={() => results.current?.scrollIntoView({ behavior: "smooth" })}><Icon name="grid" className="h-4 w-4" />{locale === "ar" ? "العقارات" : "Listings"}</button><a href="#properties-map"><Icon name="location" className="h-4 w-4" />{locale === "ar" ? "الخريطة" : "Map"}</a></div></div>
+        <div className="estate-filter-chips">{[
+          { key: "status", value: filters.status, label: filters.status ? t(`badges.status.${filters.status}`) : "" },
+          { key: "listingType", value: filters.listingType, label: filters.listingType ? t(`badges.listingType.${filters.listingType}`) : "" },
+          { key: "propertyType", value: filters.propertyType, label: filters.propertyType ? t(`offer.types.${filters.propertyType}`) : "" },
+          { key: "search", value: filters.search, label: filters.search },
+          { key: "location", value: filters.location, label: filters.location },
+          { key: "minPrice", value: filters.minPrice, label: `${t("courtyard.minPrice")}: ${filters.minPrice}` },
+          { key: "maxPrice", value: filters.maxPrice, label: `${t("courtyard.maxPrice")}: ${filters.maxPrice}` },
+          { key: "rooms", value: filters.rooms, label: `${filters.rooms}+ ${t("property.rooms")}` },
+        ].filter(chip => chip.value).map(chip => <button type="button" key={chip.key} aria-label={`${t("filters.reset")}: ${chip.label}`} onClick={() => navigate({ ...filters, [chip.key]: "" }, 1)}>{chip.label}<span aria-hidden="true">×</span></button>)}</div>
       <div ref={results} className="scroll-mt-6">
       {status === "loading" && <LoadingGrid count={6} />}
 
@@ -122,7 +123,7 @@ function ListingsBrowserContent({
 
       {status === "ready" && properties.length > 0 && (
         <>
-          <p role="status" className="mb-5 text-sm font-medium text-ink-500">{t("browse.resultsCount", { count: total })}</p>
+
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {properties.map((p) => (
               <PropertyCard key={p._id} property={p} />
@@ -133,6 +134,7 @@ function ListingsBrowserContent({
       {status === "ready" && total > pageSize && <nav className="courtyard-pagination" aria-label={t("courtyard.pagination")}><button type="button" disabled={page === 1} onClick={() => { setPage(page - 1); results.current?.scrollIntoView({ behavior: "smooth" }); }}>{t("courtyard.previous")}</button>{Array.from({ length: Math.ceil(total / pageSize) }, (_, index) => index + 1).filter(n => n === 1 || n === Math.ceil(total / pageSize) || Math.abs(n - page) <= 1).map((n, index, nums) => <span key={n}>{index > 0 && n - nums[index - 1] > 1 && <span className="px-2">…</span>}<button type="button" aria-current={page === n ? "page" : undefined} aria-label={t("courtyard.page", { page: n, pages: Math.ceil(total / pageSize) })} onClick={() => { setPage(n); results.current?.scrollIntoView({ behavior: "smooth" }); }}>{n}</button></span>)}<button type="button" disabled={page >= Math.ceil(total / pageSize)} onClick={() => { setPage(page + 1); results.current?.scrollIntoView({ behavior: "smooth" }); }}>{t("courtyard.next")}</button></nav>}
       </div>
       <PropertiesMap filters={filters} />
+      </div>
     </div>
   );
 }

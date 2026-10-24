@@ -1,6 +1,8 @@
 import type { SVGProps } from "react";
 
 const paths = {
+  chevronDown: "m6 9 6 6 6-6",
+  menu: "M4 6h16M4 12h16M4 18h16",
   copy: "M9 9h12v12H9zM15 9V3H3v12h6",
   tiktok: "M14 3v12.5a4.5 4.5 0 1 1-4-4.47V14a1.5 1.5 0 1 0 1 1.5V3h3ZM14 3c0 4 2 6 6 6V6c-2 0-3-1-3-3",
   share: "M18 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6ZM6 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6ZM18 16a3 3 0 1 1 0 6 3 3 0 0 1 0-6ZM9 10l6-4M9 14l6 4",

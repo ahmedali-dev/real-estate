@@ -16,6 +16,7 @@ import { CategoryBadge } from "@/components/properties/CategoryBadge";
 import { ListingTypeBadge } from "@/components/properties/ListingTypeBadge";
 import { StatusBadge } from "@/components/properties/StatusBadge";
 import { ResidencyBadge } from "@/components/properties/ResidencyBadge";
+import { LoadingProperty } from "@/components/ui/LoadingState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { fetchProperty, deleteProperty, ApiClientError } from "@/lib/api-client";
@@ -74,14 +75,7 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
     }
   }
 
-  if (status === "loading") {
-    return (
-      <div className="mx-auto max-w-5xl animate-pulse px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-6 h-8 w-2/3 rounded bg-stone-200" />
-        <div className="aspect-video w-full rounded-2xl bg-stone-200" />
-      </div>
-    );
-  }
+  if (status === "loading") return <LoadingProperty />;
 
   if (status === "notfound") {
     return (
@@ -135,6 +129,7 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
         <div>
       {images.length > 0 ? (
         <div className="editorial-gallery">
+          <div className={`estate-gallery-grid ${images.length > 1 ? "has-side-images" : ""}`}>
           <div className="editorial-image-stage">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -142,6 +137,12 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
               alt={property.title}
               className="h-full max-h-[70vh] w-full object-contain"
             />
+          </div>
+          {images.length > 1 && <div className="estate-gallery-side">{images.slice(1, 3).map((image, index) => <button type="button" key={image + index} aria-label={`${t("property.viewFullImage")} ${index + 2}`} onClick={() => { setActiveImage(index + 1); galleryDialog.current?.showModal(); }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image} alt={`${property.title} — ${index + 2}`} className="h-full w-full object-contain" />
+            {index === Math.min(images.length - 2, 1) && <span><Icon name="image" className="h-4 w-4" />{images.length} {locale === "ar" ? "صور" : "photos"}</span>}
+          </button>)}</div>}
           </div>
           <button type="button" className="btn-secondary mt-3 w-full sm:w-auto" onClick={() => galleryDialog.current?.showModal()}>
             <Icon name="image" className="h-4 w-4" />{t("property.viewFullImage")} <span className="text-ink-400">{activeImage + 1} / {images.length}</span>
@@ -166,7 +167,7 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
           )}
         </div>
       ) : (
-        <div className="editorial-image-stage text-ink-300">
+        <div className="editorial-image-stage estate-empty-gallery text-ink-300">
           <span className="font-display italic">{t("property.noImages")}</span>
         </div>
       )}

@@ -15,7 +15,7 @@ import { formatLocation } from "@/lib/format";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 export function PropertyCard({ property }: { property: PropertyDTO }) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [quickOpen, setQuickOpen] = useState(false);
   const { data: session } = useSession();
   const image = property.images[0];
@@ -58,6 +58,7 @@ export function PropertyCard({ property }: { property: PropertyDTO }) {
           <CategoryBadge category={property.category} propertyType={property.propertyType} />
           <StatusBadge status={property.status} />
         </div>
+        {property.images.length > 0 && <span className="estate-photo-count"><Icon name="image" className="h-3.5 w-3.5" />{property.images.length}</span>}
         <div className="absolute end-3 top-3">
           <ListingTypeBadge listingType={property.listingType} />
         </div>
@@ -89,8 +90,9 @@ export function PropertyCard({ property }: { property: PropertyDTO }) {
     </Link>
     <div className="haven-card-footer">
       <PriceDisplay price={property.price} listingType={property.listingType} rentalPeriod={property.rentalPeriod} />
-      <button type="button" onClick={() => setQuickOpen(true)} className="haven-quick-view" aria-label={`${t("property.quickView")}: ${property.title}`}><Icon name="search" className="h-4 w-4" />{t("property.quickView")}</button>
+
     </div>
+    <div className="estate-card-actions"><Link href={`/properties/${property._id}`} className="btn-primary">{locale === "ar" ? "عرض التفاصيل" : "View details"}</Link><button type="button" onClick={() => setQuickOpen(true)} className="btn-secondary" aria-label={`${t("property.quickView")}: ${property.title}`}><Icon name="search" className="h-4 w-4" /><span>{t("property.quickView")}</span></button></div>
     {quickOpen && <PropertyQuickView property={property} onClose={() => setQuickOpen(false)} />}
     </article>
   );

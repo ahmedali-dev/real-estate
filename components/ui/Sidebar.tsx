@@ -89,7 +89,7 @@ function ApartmentNav({ onNavigate }: { onNavigate?: () => void }) {
   const listingType = search.get("listingType");
   return <details key={active ? "apartments" : "other"} open={active} className="group/apartments">
     <summary className={`flex cursor-pointer list-none items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition [&::-webkit-details-marker]:hidden ${active ? "bg-ink-800 text-stone-50" : "text-ink-600 hover:bg-ink-50"}`}>
-      <Icon name="home" className="h-5 w-5" />{t("nav.apartments")}<span aria-hidden="true" className="ms-auto transition-transform group-open/apartments:rotate-180">⌄</span>
+      <Icon name="home" className="h-5 w-5" />{t("nav.apartments")}<Icon name="chevronDown" className="ms-auto h-4 w-4 transition-transform group-open/apartments:rotate-180" />
     </summary>
     <div className="ms-5 mt-1 space-y-1 border-s border-ink-100 ps-3">
       {[
@@ -124,6 +124,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <nav className="flex h-full flex-col gap-8 overflow-y-auto p-5">
+      <Link href="/" onClick={onNavigate} className="estate-sidebar-brand"><span className="estate-brand-mark">41</span><span><strong>{t("nav.brand")}</strong><small>{t("nav.browseSection")}</small></span></Link>
       <div>
         <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-ink-500">
           {t("nav.browseSection")}

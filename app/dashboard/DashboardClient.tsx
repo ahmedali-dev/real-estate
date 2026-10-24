@@ -101,7 +101,7 @@ function DashboardContent({ publicOrigin }: { publicOrigin: string | null }) {
   if (!ready) return null;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="estate-dashboard mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-brass-600">

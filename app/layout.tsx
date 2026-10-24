@@ -2,6 +2,7 @@ import { listingKeywords } from "@/lib/seo/keywords";
 import { configuredPublicSiteOrigin } from "@/lib/site-url";
 import type { Metadata } from "next";
 import "./globals.css";
+import "./redesign.css";
 import { AppShell } from "@/components/ui/AppShell";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { AuthSessionProvider } from "@/components/auth/AuthSessionProvider";

@@ -3,11 +3,7 @@
 import type { ListingStatus } from "@/types/property";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
-/**
- * Renders nothing for "available" (the default, expected state) so normal
- * listings stay uncluttered. Sold/rented listings get a solid, unmistakable
- * badge since that's the state a viewer most needs to notice at a glance.
- */
+/** Status always has a text label and a distinct semantic color. */
 export function StatusBadge({
   status,
   size = "md",
@@ -16,18 +12,17 @@ export function StatusBadge({
   size?: "sm" | "md";
 }) {
   const { t } = useLanguage();
-  if (status === "available") return null;
 
   const sizeClasses = size === "sm" ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs";
 
   return (
     <span
       className={[
-        "inline-flex items-center gap-1.5 rounded-full bg-ink-800 font-bold uppercase tracking-wider text-stone-50",
+        `estate-status estate-status-${status} inline-flex items-center gap-1.5 rounded-full font-semibold`,
         sizeClasses,
       ].join(" ")}
     >
-      {t(`badges.status.${status}`)}
+      <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />{t(`badges.status.${status}`)}
     </span>
   );
 }

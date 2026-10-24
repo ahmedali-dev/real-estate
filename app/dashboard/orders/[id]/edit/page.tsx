@@ -1,4 +1,5 @@
 "use client";
+import { LoadingForm } from "@/components/ui/LoadingState";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -45,12 +46,7 @@ export default function EditOrderPage() {
       </h1>
 
       <div className="mt-8">
-        {status === "loading" && (
-          <div className="animate-pulse rounded-lg border border-ink-100 bg-white p-8 shadow-card">
-            <div className="h-6 w-1/3 rounded bg-stone-200" />
-            <div className="mt-4 h-10 w-full rounded bg-stone-200" />
-          </div>
-        )}
+        {status === "loading" && <LoadingForm />}
         {status === "notfound" && <p className="text-ink-500">{t("orders.notFound")}</p>}
         {status === "error" && <ErrorState onRetry={load} />}
         {status === "ready" && order && (

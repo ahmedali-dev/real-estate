@@ -18,14 +18,14 @@ export function DashboardStats({ stats }: { stats: PropertyListResponse["stats"]
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+    <div className="estate-stats grid grid-cols-2 gap-4 xl:grid-cols-4">
       {cards.map((c) => (
         <div
           key={c.label}
-          className="rounded-lg border border-ink-100 bg-white p-4 shadow-card"
+          className="estate-stat rounded-xl border border-ink-100 bg-white p-5"
         >
-          <p className={`font-display text-2xl font-semibold ${c.accent}`}>{c.value}</p>
-          <p className="mt-1 text-xs font-medium uppercase tracking-wide text-ink-400">
+          <p className={`font-mono text-3xl font-medium ${c.accent}`}>{c.value}</p>
+          <p className="mt-1 text-sm font-medium text-ink-500">
             {c.label}
           </p>
         </div>
