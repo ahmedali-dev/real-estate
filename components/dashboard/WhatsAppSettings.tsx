@@ -1,4 +1,5 @@
 "use client";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 export function WhatsAppSettings({ onSaved }: { onSaved: () => void }) {
@@ -16,7 +17,7 @@ export function WhatsAppSettings({ onSaved }: { onSaved: () => void }) {
     <label className="block text-sm">{ar ? "عنوان خادم واتساب" : "WhatsApp server URL"}<input required type="url" dir="ltr" className="input-field mt-2" placeholder="https://whatsapp.example.com" value={data.url} onChange={e => setData({ ...data, url: e.target.value })} /></label>
     <label className="block text-sm">API key<input type="password" autoComplete="new-password" dir="ltr" required={!data.hasKey} className="input-field mt-2" placeholder={data.hasKey ? (ar ? "محفوظ — اتركه فارغًا للاحتفاظ به" : "Saved — leave blank to keep") : ""} value={data.apiKey} onChange={e => setData({ ...data, apiKey: e.target.value })} /></label>
     <label className="block text-sm">{ar ? "عنوان الموقع العام" : "Public website URL"}<input required type="url" dir="ltr" className="input-field mt-2" value={data.siteUrl} onChange={e => setData({ ...data, siteUrl: e.target.value })} /></label>
-    <label className="block text-sm">{ar ? "لغة الرد التلقائي" : "Automatic reply language"}<select className="input-field mt-2" value={data.replyLocale} onChange={e => setData({ ...data, replyLocale: e.target.value })}><option value="ar">العربية</option><option value="en">English</option></select></label>
+    <label className="block text-sm">{ar ? "لغة الرد التلقائي" : "Automatic reply language"}<SelectDropdown className="input-field mt-2" value={data.replyLocale} onChange={e => setData({ ...data, replyLocale: e.target.value })}><option value="ar">العربية</option><option value="en">English</option></SelectDropdown></label>
     <p className="text-xs text-ink-500">{ar ? "عنوان Webhook على خادم واتساب:" : "Set this webhook URL on the WhatsApp service:"}<code dir="ltr" className="mt-1 block break-all">{data.siteUrl.replace(/\/$/, '')}/api/webhooks/whatsapp</code></p>
     <button type="submit" className="btn-primary" disabled={loading || busy}>{busy ? (ar ? "جارٍ الحفظ…" : "Saving…") : (ar ? "حفظ وفحص الاتصال" : "Save & check connection")}</button></fieldset>{notice && <p role="status" className="text-sm">{notice}</p>}</form></section>;
 }

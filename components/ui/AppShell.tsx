@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useSession } from "next-auth/react";
+import { BrandLogo } from "./BrandLogo";
+import { Icon } from "./Icon";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { SidebarNav } from "./Sidebar";
@@ -9,9 +12,24 @@ import { SiteHeader } from "./SiteHeader";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarHovered, setSidebarHovered] = useState(false);
+  const [sidebarFocused, setSidebarFocused] = useState(false);
+  const railCollapsed = sidebarCollapsed && !sidebarHovered && !sidebarFocused;
+  useEffect(() => {
+    try { setSidebarCollapsed(localStorage.getItem("estate-sidebar-collapsed") !== "false"); } catch {}
+  }, []);
+  function toggleSidebar() {
+    setSidebarCollapsed(previous => {
+      const next = !previous;
+      try { localStorage.setItem("estate-sidebar-collapsed", String(next)); } catch {}
+      return next;
+    });
+  }
   const pathname = usePathname();
   const { t, locale } = useLanguage();
-  const staff = pathname.startsWith("/dashboard");
+  const { status } = useSession();
+  const staff = status === "authenticated" || pathname.startsWith("/dashboard");
   const contentRef = useRef<HTMLDivElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -48,13 +66,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Close the mobile drawer automatically whenever navigation happens.
   useEffect(() => {
     setMobileOpen(false);
-  }, [pathname]);
+  }, [pathname, staff]);
 
   return (
     <div className={`estate-shell flex min-h-screen ${staff ? "estate-workspace" : "estate-public"}`}>
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-white focus:p-3">{t("nav.skipContent")}</a>
-      {staff && <aside className="estate-sidebar hidden w-64 flex-shrink-0 border-e lg:block">
-        <div className="sticky top-0 h-screen"><SidebarNav /></div>
+      {staff && <aside className={`estate-sidebar hidden flex-shrink-0 border-e lg:block ${railCollapsed ? "is-collapsed" : ""}`} onPointerEnter={event => { if (event.pointerType === "mouse") setSidebarHovered(true); }} onPointerLeave={() => setSidebarHovered(false)} onFocusCapture={() => setSidebarFocused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setSidebarFocused(false); }}>
+        <div className="sticky top-0 flex h-screen flex-col">
+          <div className="flex justify-end px-3 pt-3">
+            <button type="button" onClick={toggleSidebar} className="estate-sidebar-toggle" aria-controls="desktop-sidebar-nav" aria-expanded={!railCollapsed} aria-label={locale === "ar" ? sidebarCollapsed ? "تثبيت القائمة مفتوحة" : "الطي التلقائي عند المغادرة" : sidebarCollapsed ? "Keep sidebar expanded" : "Auto-collapse sidebar"} title={locale === "ar" ? sidebarCollapsed ? "تثبيت القائمة مفتوحة" : "الطي التلقائي عند المغادرة" : sidebarCollapsed ? "Keep sidebar expanded" : "Auto-collapse sidebar"}>
+              <Icon name={sidebarCollapsed ? "sidebarExpand" : "sidebarCollapse"} className={`h-[18px] w-[18px] ${locale === "ar" ? "-scale-x-100" : ""}`} />
+            </button>
+          </div>
+          <div id="desktop-sidebar-nav" className="min-h-0 flex-1"><SidebarNav collapsed={railCollapsed} /></div>
+        </div>
       </aside>}
 
       {/* Mobile drawer */}
@@ -73,7 +98,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col" ref={contentRef}>
-        <SiteHeader onMenuClick={() => setMobileOpen(true)} staff={staff} />
+        {staff ? <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-ink-100 bg-white px-4 py-3 lg:hidden">
+          <button type="button" onClick={() => setMobileOpen(true)} className="btn-secondary !px-3" aria-label={t("nav.openMenu")} aria-expanded={mobileOpen}>
+            <Icon name="menu" className="h-5 w-5" />
+          </button>
+          <BrandLogo compact />
+        </div> : status === "loading" ? <div className="h-16" aria-hidden="true" /> : <SiteHeader onMenuClick={() => setMobileOpen(true)} /> }
         <main id="main-content" tabIndex={-1} className={`min-h-[calc(100vh-64px)] flex-1 ${/^\/properties\/[^/]+\/?$/.test(pathname) ? "editorial-page-background" : ["/", "/apartments", "/builds", "/lands"].includes(pathname) ? "courtyard-page-background" : ""}`}>{children}</main>
         {!staff && <footer id="office-contact" className="estate-footer"><div><span className="estate-eyebrow">41 REAL ESTATE</span><h2>{locale === "ar" ? "عقارك القادم يبدأ بمحادثة." : "Your next place starts with a conversation."}</h2><p>{locale === "ar" ? "تواصل مع مكتبنا للمساعدة في البيع والإيجار وإدارة الأملاك." : "Talk to our office about buying, renting, and property management."}</p></div><div className="flex flex-wrap gap-3"><a className="btn-primary" href={officeWhatsAppLink(OFFICE_PHONE_NUMBERS[0])} target="_blank" rel="noopener noreferrer">{locale === "ar" ? "تواصل عبر واتساب" : "Chat on WhatsApp"}</a><a className="btn-secondary" href={officeCallLink(OFFICE_PHONE_NUMBERS[0])}>{locale === "ar" ? "اتصل بالمكتب" : "Call the office"}</a></div></footer>}
       </div>

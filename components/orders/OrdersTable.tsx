@@ -1,4 +1,5 @@
 "use client";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 
 import Link from "next/link";
 import { CopyButton } from "@/components/ui/CopyButton";
@@ -99,7 +100,7 @@ export function OrdersTable({
                   <p className="line-clamp-2">{order.notes || "—"}</p>
                 </td>
                 <td className="px-4 py-3">
-                  <select
+                  <SelectDropdown
                     value={order.status}
                     onChange={(e) => handleStatusChange(order, e.target.value as OrderStatus)}
                     className={`rounded-full border-0 px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${STATUS_STYLES[order.status]}`}
@@ -108,7 +109,7 @@ export function OrdersTable({
                     <option value="contacted">{t("orders.statusContacted")}</option>
                     <option value="fulfilled">{t("orders.statusFulfilled")}</option>
                     <option value="cancelled">{t("orders.statusCancelled")}</option>
-                  </select>
+                  </SelectDropdown>
                 </td>
                 <td className="px-4 py-3 text-ink-400">{formatDate(order.updatedAt, locale)}</td>
                 <td className="px-4 py-3">

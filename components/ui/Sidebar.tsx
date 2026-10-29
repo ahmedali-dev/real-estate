@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandLogo } from "./BrandLogo";
 import { Icon, type IconName } from "./Icon";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -104,8 +105,8 @@ function ApartmentNav({ onNavigate }: { onNavigate?: () => void }) {
   </details>;
 }
 
-export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
-  const { t } = useLanguage();
+export function SidebarNav({ onNavigate, collapsed = false }: { onNavigate?: () => void; collapsed?: boolean }) {
+  const { t, locale, setLocale } = useLanguage();
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
@@ -122,9 +123,23 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
     adminItems.push({ href: "/dashboard/whatsapp", labelKey: "whatsappConnection.title", mark: "phone" });
   }
 
+  if (collapsed) return <nav className="estate-sidebar-rail flex h-full flex-col items-center gap-3 overflow-y-auto">
+    <Link href="/" onClick={onNavigate} className="estate-sidebar-brand" aria-label={t("nav.brand")}><BrandLogo compact /></Link>
+    <button type="button" className="estate-rail-action" onClick={() => setLocale(locale === "en" ? "ar" : "en")} aria-label={locale === "en" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"} title={locale === "en" ? "العربية" : "English"}><Icon name="globe" /></button>
+    {[...BROWSE_ITEMS, ...adminItems].map(item => <Link key={item.href} href={item.href} onClick={onNavigate} className="estate-rail-action" aria-label={t(item.labelKey)} title={t(item.labelKey)} aria-current={isActive(pathname, item.href) ? "page" : undefined}><Icon name={item.mark} /></Link>)}
+    <div className="mt-auto flex flex-col gap-3">
+      {role && LISTINGS_ROLES.includes(role) && <Link href="/dashboard/new" onClick={onNavigate} className="estate-rail-action" aria-label={t("nav.addListing")} title={t("nav.addListing")}><Icon name="home" /><span aria-hidden="true">+</span></Link>}
+      {status === "authenticated" ? <button type="button" className="estate-rail-action" onClick={() => signOut({callbackUrl:"/"})} aria-label={t("auth.signOut")} title={t("auth.signOut")}><Icon name="lock" /></button> : <Link href="/login" className="estate-rail-action" aria-label={t("auth.staffSignIn")} title={t("auth.staffSignIn")}><Icon name="user" /></Link>}
+    </div>
+  </nav>;
+
   return (
     <nav className="flex h-full flex-col gap-8 overflow-y-auto p-5">
-      <Link href="/" onClick={onNavigate} className="estate-sidebar-brand"><span className="estate-brand-mark">41</span><span><strong>{t("nav.brand")}</strong><small>{t("nav.browseSection")}</small></span></Link>
+      <Link href="/" onClick={onNavigate} className="estate-sidebar-brand" aria-label={t("nav.brand")}><BrandLogo /></Link>
+      <button type="button" onClick={() => setLocale(locale === "en" ? "ar" : "en")} className="btn-secondary w-full" aria-label={locale === "en" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"}>
+        <Icon name="globe" className="h-4 w-4" />{locale === "en" ? "العربية" : "English"}
+      </button>
+
       <div>
         <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-ink-500">
           {t("nav.browseSection")}

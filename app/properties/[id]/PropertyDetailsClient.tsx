@@ -132,7 +132,7 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
           <div className={`estate-gallery-grid ${images.length > 1 ? "has-side-images" : ""}`}>
           <div className="editorial-image-stage">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <img decoding="async" loading="eager"
               src={images[activeImage]}
               alt={property.title}
               className="h-full max-h-[70vh] w-full object-contain"
@@ -140,7 +140,7 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
           </div>
           {images.length > 1 && <div className="estate-gallery-side">{images.slice(1, 3).map((image, index) => <button type="button" key={image + index} aria-label={`${t("property.viewFullImage")} ${index + 2}`} onClick={() => { setActiveImage(index + 1); galleryDialog.current?.showModal(); }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={image} alt={`${property.title} — ${index + 2}`} className="h-full w-full object-contain" />
+            <img decoding="async" loading="lazy" src={image} alt={`${property.title} — ${index + 2}`} className="h-full w-full object-contain" />
             {index === Math.min(images.length - 2, 1) && <span><Icon name="image" className="h-4 w-4" />{images.length} {locale === "ar" ? "صور" : "photos"}</span>}
           </button>)}</div>}
           </div>
@@ -160,7 +160,7 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img} alt="" className="h-full w-full bg-stone-200 object-contain" />
+                  <img decoding="async" loading="lazy" src={img} alt="" className="h-full w-full bg-stone-200 object-contain" />
                 </button>
               ))}
             </div>
@@ -516,7 +516,7 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
       <dialog ref={galleryDialog} className="editorial-lightbox" aria-label={t("property.viewFullImage")}>
         <div className="flex items-center justify-between gap-4 border-b border-ink-100 bg-white p-4"><p>{property.title}</p><button type="button" className="btn-secondary" onClick={() => galleryDialog.current?.close()}>{t("common.close")}</button></div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {images[activeImage] && <img src={images[activeImage]} alt={property.title} className="max-h-[80vh] w-full object-contain" />}
+        {images[activeImage] && <img decoding="async" loading="eager" src={images[activeImage]} alt={property.title} className="max-h-[80vh] w-full object-contain" />}
       </dialog>
 
       <ConfirmDialog

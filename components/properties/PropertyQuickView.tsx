@@ -39,11 +39,11 @@ export function PropertyQuickView({ property: initialProperty, onClose }: { prop
       <div>
         <div className="quick-view-image">{property.images[image] ? <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={property.images[image]} alt={property.title} />
+          <img decoding="async" loading="eager" src={property.images[image]} alt={property.title} />
         </> : <div className="flex flex-col items-center gap-3 text-ink-400"><Icon name="image" className="h-10 w-10" />{t("property.noImage")}</div>}</div>
         {property.images.length > 1 && <div className="flex flex-wrap gap-2 p-3">{property.images.map((url, index) => <button key={`${url}-${index}`} type="button" aria-label={`${t("property.imageNumber")} ${index + 1}`} aria-pressed={image === index} onClick={() => setImage(index)} className={`h-12 w-16 overflow-hidden rounded-lg border-2 ${image === index ? "border-moss-600" : "border-transparent"}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={url} alt="" className="h-full w-full object-contain" />
+          <img decoding="async" loading="lazy" src={url} alt="" className="h-full w-full object-contain" />
         </button>)}</div>}
       </div>
       <div className="p-5 sm:p-6">

@@ -1,4 +1,5 @@
 "use client";
+import { BrandLogo } from "./BrandLogo";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -10,7 +11,7 @@ export function SiteHeader({ onMenuClick, staff = false }: { onMenuClick?: () =>
   const pathname = usePathname();
   return <header className="estate-header sticky top-0 z-30">
     <div className="estate-header-inner">
-      <Link href="/" className="estate-brand"><span className="estate-brand-mark">41</span><span><strong>{t("nav.brand")}</strong><small>{locale === "ar" ? "بيع وإيجار وإدارة أملاك" : "Buy, rent & property management"}</small></span></Link>
+      <Link href="/" className="estate-brand"><BrandLogo compact /><span className="estate-brand-caption"><small>{locale === "ar" ? "بيع وإيجار وإدارة أملاك" : "Buy, rent & property management"}</small></span></Link>
       {!staff && <nav className="estate-public-nav" aria-label={t("nav.browseSection")}>{[
         ["/", "nav.allListings", "grid"], ["/apartments", "nav.apartments", "home"], ["/builds", "nav.builds", "building"], ["/lands", "nav.lands", "land"],
       ].map(([href, key, icon]) => href === "/apartments" ? <details key={href} className="estate-nav-dropdown"><summary className={pathname === href ? "is-active" : ""}><Icon name="home" className="h-4 w-4" />{t(key)} <Icon name="chevronDown" className="estate-dropdown-chevron h-4 w-4" /></summary><div><Link href="/apartments"><Icon name="home" className="h-4 w-4" />{locale === "ar" ? "جميع الشقق" : "All apartments"}</Link><Link href="/apartments?listingType=sale"><Icon name="money" className="h-4 w-4" />{t("filters.forSale")}</Link><Link href="/apartments?listingType=rent"><Icon name="key" className="h-4 w-4" />{t("filters.forRent")}</Link></div></details> : <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined}><Icon name={icon as IconName} className="h-4 w-4" />{t(key)}</Link>)}<a href="#office-contact"><Icon name="phone" className="h-4 w-4" />{locale === "ar" ? "اتصل بالمكتب" : "Contact office"}</a></nav>}

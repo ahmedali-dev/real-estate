@@ -1,4 +1,5 @@
 "use client";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 
 import { useCallback, useEffect, useState, useRef, useMemo, Suspense } from "react";
 import Link from "next/link";
@@ -131,7 +132,7 @@ function DashboardContent({ publicOrigin }: { publicOrigin: string | null }) {
 
       <div ref={results} className="mb-4 flex scroll-mt-6 flex-wrap items-center justify-between gap-3">
         <p role="status" className="text-sm text-ink-500">{status === "ready" ? (locale === "ar" ? `عرض ${total ? (page - 1) * pageSize + 1 : 0}–${Math.min(page * pageSize, total)} من ${total} عقار` : `Showing ${total ? (page - 1) * pageSize + 1 : 0}–${Math.min(page * pageSize, total)} of ${total} properties`) : ""}</p>
-        <label className="flex items-center gap-2 text-sm text-ink-600">{locale === "ar" ? "عقارات لكل صفحة" : "Properties per page"}<select className="rounded-lg border border-ink-100 bg-white px-3 py-2" value={pageSize} onChange={event => { requestVersion.current++; navigate(filters, 1, Number(event.target.value)); }}>{[10, 20, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}</select></label>
+        <label className="flex items-center gap-2 text-sm text-ink-600">{locale === "ar" ? "عقارات لكل صفحة" : "Properties per page"}<SelectDropdown className="rounded-lg border border-ink-100 bg-white px-3 py-2" value={pageSize} onChange={event => { requestVersion.current++; navigate(filters, 1, Number(event.target.value)); }}>{[10, 20, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}</SelectDropdown></label>
       </div>
       {status === "loading" && <LoadingRow />}
       {status === "error" && (filterError ? <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{filterError}</p> : <ErrorState onRetry={() => load(filters, page, pageSize)} />)}

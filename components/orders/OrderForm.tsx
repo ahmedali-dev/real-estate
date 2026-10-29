@@ -1,4 +1,5 @@
 "use client";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -127,7 +128,7 @@ export function OrderForm({ order }: { order?: OrderDTO }) {
 
         <div>
           <label className="label-field" htmlFor="requestedCategory">{t("orders.wants")}</label>
-          <select
+          <SelectDropdown
             id="requestedCategory"
             className="input-field"
             value={form.requestedCategory}
@@ -136,7 +137,7 @@ export function OrderForm({ order }: { order?: OrderDTO }) {
             <option value="apartment">{t("form.categoryApartment")}</option>
             <option value="build">{t("form.categoryBuild")}</option>
             <option value="land">{t("form.categoryLand")}</option>
-          </select>
+          </SelectDropdown>
           {errors.requestedCategory && <p className="field-error">{errors.requestedCategory}</p>}
         </div>
 
@@ -145,7 +146,7 @@ export function OrderForm({ order }: { order?: OrderDTO }) {
           {isLand ? (
             <input className="input-field" value={t("form.saleOnly")} disabled />
           ) : (
-            <select
+            <SelectDropdown
               id="requestedListingType"
               className="input-field"
               value={form.requestedListingType}
@@ -154,14 +155,14 @@ export function OrderForm({ order }: { order?: OrderDTO }) {
               <option value="">{t("orders.noPreference")}</option>
               <option value="sale">{t("form.listingTypeSale")}</option>
               <option value="rent">{t("form.listingTypeRent")}</option>
-            </select>
+            </SelectDropdown>
           )}
         </div>
 
         {isEdit && (
           <div>
             <label className="label-field" htmlFor="status">{t("orders.status")}</label>
-            <select
+            <SelectDropdown
               id="status"
               className="input-field"
               value={form.status}
@@ -171,7 +172,7 @@ export function OrderForm({ order }: { order?: OrderDTO }) {
               <option value="contacted">{t("orders.statusContacted")}</option>
               <option value="fulfilled">{t("orders.statusFulfilled")}</option>
               <option value="cancelled">{t("orders.statusCancelled")}</option>
-            </select>
+            </SelectDropdown>
           </div>
         )}
 

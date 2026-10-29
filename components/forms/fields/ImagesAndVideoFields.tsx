@@ -41,13 +41,33 @@ export function ImagesAndVideoFields({
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   useEffect(() => () => { if (localPreview) URL.revokeObjectURL(localPreview); }, [localPreview]);
   const [uploading, setUploading] = useState(false);
+  const uploadInProgress = useRef(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  async function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    e.target.value = ""; // allow selecting the same file again later
-    if (!file) return;
+    e.target.value = "";
+    if (file) void uploadFile(file);
+  }
 
+  function handlePaste(event: React.ClipboardEvent<HTMLElement>) {
+    const file = Array.from(event.clipboardData.files).find(item => item.type.startsWith("image/"));
+    if (!file) return; // Preserve normal text and URL pasting.
+    event.preventDefault();
+    void uploadFile(file);
+  }
+
+  async function uploadFile(file: File) {
+    if (uploadInProgress.current) return;
+    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+      setUploadError(t("form.imageTypeError"));
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setUploadError(t("form.imageSizeError"));
+      return;
+    }
+    uploadInProgress.current = true;
     setLocalPreview(URL.createObjectURL(file));
     setUploadError(null);
     setUploading(true);
@@ -57,6 +77,7 @@ export function ImagesAndVideoFields({
     } catch (err) {
       setUploadError(err instanceof ApiClientError ? err.message : t("form.uploadError"));
     } finally {
+      uploadInProgress.current = false;
       setUploading(false);
       setLocalPreview(null);
     }
@@ -99,10 +120,21 @@ export function ImagesAndVideoFields({
         )}
       </section>
 
-      <section>
+      <section onPaste={handlePaste}>
         <h3 className="flex flex-wrap items-center gap-2 font-display text-base font-semibold text-ink-800"><Icon name="image" className="h-5 w-5 text-moss-500" />{t("form.imagesSection")}</h3>
         <p className="mt-1 text-sm text-ink-400">{t("form.imagesHint")}</p>
 
+        <div
+          role="group"
+          tabIndex={0}
+          aria-label={t("form.pasteImage")}
+          aria-busy={uploading}
+          className="mt-3 rounded-xl border-2 border-dashed border-ink-200 bg-stone-50 p-5 text-center outline-none focus-visible:border-moss-500 focus-visible:ring-2 focus-visible:ring-moss-200"
+        >
+          <Icon name="image" className="mx-auto mb-2 h-6 w-6 text-moss-500" />
+          <p className="text-sm font-semibold text-ink-700">{t("form.pasteImage")}</p>
+          <p className="mt-1 text-xs text-ink-400">{t("form.pasteImageHint")}</p>
+        </div>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <input
             ref={fileInputRef}
@@ -123,10 +155,10 @@ export function ImagesAndVideoFields({
         </div>
         {localPreview && <div className="mt-3 overflow-hidden rounded-xl border border-ink-100 bg-stone-50">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={localPreview} alt={t("form.imagePreview")} className="max-h-72 w-full object-contain" />
+          <img decoding="async" loading="eager" src={localPreview} alt={t("form.imagePreview")} className="max-h-72 w-full object-contain" />
           <p role="status" className="p-3 text-xs text-ink-500">{t("form.uploading")}</p>
         </div>}
-        {uploadError && <p className="field-error mt-2">{uploadError}</p>}
+        {uploadError && <p role="alert" className="field-error mt-2">{uploadError}</p>}
 
         <div className="mt-3 flex gap-2">
           <input
@@ -184,6 +216,6 @@ function ImagePreview({ url, label, errorLabel }: { url: string; label: string; 
   return <div className="flex h-44 items-center justify-center bg-white">
     {failed ? <p role="status" className="px-4 text-center text-xs text-ink-500">{errorLabel}</p> :
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={url} alt={label} onError={() => setFailed(true)} className="h-full w-full object-contain" />}
+      <img loading="lazy" decoding="async" src={url} alt={label} onError={() => setFailed(true)} className="h-full w-full object-contain" />}
   </div>;
 }

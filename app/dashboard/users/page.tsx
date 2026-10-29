@@ -1,4 +1,5 @@
 "use client";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -191,7 +192,7 @@ export default function UsersPage() {
           </div>
           <div>
             <label className="label-field" htmlFor="role">{t("users.role")}</label>
-            <select
+            <SelectDropdown
               id="role"
               className="input-field"
               value={form.role}
@@ -201,7 +202,7 @@ export default function UsersPage() {
               <option value="sales_officer">{t("users.roleSalesOfficer")}</option>
               <option value="project_manager">{t("users.roleProjectManager")}</option>
               <option value="admin">{t("users.roleAdmin")}</option>
-            </select>
+            </SelectDropdown>
           </div>
           <div className="sm:col-span-4">
             <button type="submit" className="btn-primary" disabled={creating}>
@@ -244,7 +245,7 @@ export default function UsersPage() {
                           onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} />
                       </td>
                       <td className="px-4 py-3">
-                        <select
+                        <SelectDropdown
                           value={u.role}
                           onChange={(e) => handleRoleChange(u, e.target.value as UserRole)}
                           className="input-field w-auto py-1.5 text-xs"
@@ -254,7 +255,7 @@ export default function UsersPage() {
                           <option value="sales_officer">{t("users.roleSalesOfficer")}</option>
                           <option value="project_manager">{t("users.roleProjectManager")}</option>
                           <option value="admin">{t("users.roleAdmin")}</option>
-                        </select>
+                        </SelectDropdown>
                       </td>
                       <td className="px-4 py-3">
                         <button

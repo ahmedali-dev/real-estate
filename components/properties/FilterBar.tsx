@@ -1,4 +1,5 @@
 "use client";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 
 import { AdvancedPropertyFilters } from "@/components/dashboard/AdvancedPropertyFilters";
 import { dashboardFilterKeys, type DashboardFilterKey } from "@/lib/dashboard-filters";
@@ -63,7 +64,7 @@ export function FilterBar({
       {!hideCategory && (
         <label className="min-w-0">
         <span className="label-field">{t("property.category")}</span>
-<select
+<SelectDropdown
           value={value.category}
           onChange={(e) => onChange({ ...value, ...(e.target.value === "land" ? { listingType: "", residencyType: "", propertyType: "", rooms: "", maxRooms: "", bathrooms: "", maxBathrooms: "", hasKitchen: "", kitchenCabinetsInstalled: "", acInstalled: "", rentalPeriod: "", hasTenant: "", tenantName: "", tenantPhone: "", tenantId: "" } : {}), ...(["land", "apartment"].includes(e.target.value) ? { minUnits: "", maxUnits: "", unitName: "", unitRented: "", electricityNumber: "" } : {}), category: e.target.value as FilterState["category"] })}
           className="input-field"
@@ -73,13 +74,13 @@ export function FilterBar({
           <option value="build">{t("filters.build")}</option>
           <option value="apartment">{t("filters.apartment")}</option>
           <option value="land">{t("filters.land")}</option>
-        </select>
+        </SelectDropdown>
       </label>
       )}
 
       {value.category !== "land" && <label className="min-w-0">
         <span className="label-field">{t("filters.typeLabel")}</span>
-<select
+<SelectDropdown
         value={value.listingType}
         onChange={(e) => onChange({ ...value, listingType: e.target.value as FilterState["listingType"] })}
         className="input-field"
@@ -88,13 +89,13 @@ export function FilterBar({
         <option value="">{t("filters.saleAndRent")}</option>
         <option value="sale">{t("filters.forSale")}</option>
         <option value="rent">{t("filters.forRent")}</option>
-      </select>
+      </SelectDropdown>
       </label>
 
       }
       <label className="min-w-0">
         <span className="label-field">{t("filters.statusLabel")}</span>
-<select
+<SelectDropdown
         value={value.status}
         onChange={(e) => onChange({ ...value, status: e.target.value as FilterState["status"] })}
         className="input-field"
@@ -104,12 +105,12 @@ export function FilterBar({
         <option value="available">{t("filters.available")}</option>
         <option value="sold">{t("filters.sold")}</option>
         <option value="rented">{t("filters.rented")}</option>
-      </select>
+      </SelectDropdown>
       </label>
 
       <label className="min-w-0">
         <span className="label-field">{t("filters.sortLabel")}</span>
-<select
+<SelectDropdown
         value={`${value.sortBy}:${value.sortDir}`}
         onChange={(e) => {
           const [sortBy, sortDir] = e.target.value.split(":") as [FilterState["sortBy"], FilterState["sortDir"]];
@@ -125,22 +126,22 @@ export function FilterBar({
         <option value="price:asc">{t("filters.sortPriceLowHigh")}</option>
         <option value="price:desc">{t("filters.sortPriceHighLow")}</option>
         <option value="title:asc">{t("filters.sortTitleAZ")}</option>
-      </select>
+      </SelectDropdown>
       </label>
       <details className="courtyard-filter-advanced"><summary><Icon name="filter" className="h-4 w-4" />{t("courtyard.moreFilters")}</summary><div className="courtyard-filter-options">
       {staffFilters && <>
-        <label><span className="label-field">{t("form.visibility")}</span><select className="input-field" value={value.visibility || ""} onChange={e => onChange({ ...value, visibility: e.target.value })}><option value="">{locale === "ar" ? "الكل" : "All"}</option><option value="public">{t("form.visibilityPublic")}</option><option value="private">{t("form.visibilityPrivate")}</option></select></label>
+        <label><span className="label-field">{t("form.visibility")}</span><SelectDropdown className="input-field" value={value.visibility || ""} onChange={e => onChange({ ...value, visibility: e.target.value })}><option value="">{locale === "ar" ? "الكل" : "All"}</option><option value="public">{t("form.visibilityPublic")}</option><option value="private">{t("form.visibilityPrivate")}</option></SelectDropdown></label>
         {([
           ["hasPrice", locale === "ar" ? "السعر" : "Price", locale === "ar" ? "بسعر" : "With price", locale === "ar" ? "بدون سعر" : "Without price"],
           ["hasImages", locale === "ar" ? "الصور" : "Photos", locale === "ar" ? "بصور" : "With photos", locale === "ar" ? "بدون صور" : "Without photos"],
           ["hasTikTok", "TikTok", locale === "ar" ? "برابط فيديو" : "With video link", locale === "ar" ? "بدون رابط فيديو" : "Without video link"],
           ["hasMap", locale === "ar" ? "رابط الخريطة" : "Saved map link", locale === "ar" ? "برابط خريطة" : "With map link", locale === "ar" ? "بدون رابط خريطة" : "Without map link"],
-        ] as const).map(([key, label, yes, no]) => <label key={key}><span className="label-field">{label}</span><select className="input-field" value={value[key] || ""} onChange={e => onChange({ ...value, [key]: e.target.value })}><option value="">{locale === "ar" ? "الكل" : "All"}</option><option value="yes">{yes}</option><option value="no">{no}</option></select></label>)}
+        ] as const).map(([key, label, yes, no]) => <label key={key}><span className="label-field">{label}</span><SelectDropdown className="input-field" value={value[key] || ""} onChange={e => onChange({ ...value, [key]: e.target.value })}><option value="">{locale === "ar" ? "الكل" : "All"}</option><option value="yes">{yes}</option><option value="no">{no}</option></SelectDropdown></label>)}
       </>}
       {!hideResidencyType && value.category !== "land" && (
         <label className="min-w-0">
         <span className="label-field">{t("form.residencyType")}</span>
-<select
+<SelectDropdown
           value={value.residencyType}
           onChange={(e) => onChange({ ...value, residencyType: e.target.value as FilterState["residencyType"] })}
           className="input-field"
@@ -150,13 +151,13 @@ export function FilterBar({
           <option value="family">{t("form.residencyTypeFamily")}</option>
           <option value="singles">{t("form.residencyTypeSingles")}</option>
           <option value="women_only">{t("form.residencyTypeWomenOnly")}</option>
-        </select>
+        </SelectDropdown>
       </label>
       )}
 
       {value.category !== "land" && <>
-        <label><span className="label-field">{t("offer.propertyType")}</span><select className="input-field" value={value.propertyType ?? ""} onChange={e => onChange({ ...value, propertyType: e.target.value })}><option value="">{t("courtyard.anyPropertyType")}</option>{["villa", "apartment", "duplex", "floor", "shop", "other"].map(type => <option key={type} value={type}>{t(`offer.types.${type}`)}</option>)}</select></label>
-        <label><span className="label-field">{t("courtyard.minRooms")}</span><select className="input-field" value={value.rooms ?? ""} onChange={e => onChange({ ...value, rooms: e.target.value })}><option value="">{t("courtyard.anyRooms")}</option>{[1,2,3,4,5].map(n => <option key={n} value={n}>{n}+</option>)}</select></label>
+        <label><span className="label-field">{t("offer.propertyType")}</span><SelectDropdown className="input-field" value={value.propertyType ?? ""} onChange={e => onChange({ ...value, propertyType: e.target.value })}><option value="">{t("courtyard.anyPropertyType")}</option>{["villa", "apartment", "duplex", "floor", "shop", "other"].map(type => <option key={type} value={type}>{t(`offer.types.${type}`)}</option>)}</SelectDropdown></label>
+        <label><span className="label-field">{t("courtyard.minRooms")}</span><SelectDropdown className="input-field" value={value.rooms ?? ""} onChange={e => onChange({ ...value, rooms: e.target.value })}><option value="">{t("courtyard.anyRooms")}</option>{[1,2,3,4,5].map(n => <option key={n} value={n}>{n}+</option>)}</SelectDropdown></label>
       </>}
       <label><span className="label-field">{t("courtyard.minPrice")}</span><input type="number" min="0" className="input-field" value={value.minPrice ?? ""} onChange={e => onChange({ ...value, minPrice: e.target.value })} /></label>
       <label><span className="label-field">{t("courtyard.maxPrice")}</span><input type="number" min="0" className="input-field" value={value.maxPrice ?? ""} onChange={e => onChange({ ...value, maxPrice: e.target.value })} /></label>

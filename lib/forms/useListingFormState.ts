@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type {
   PropertyDTO,
@@ -189,13 +189,19 @@ export function useListingFormState(category: Category, property?: PropertyDTO) 
     setForm((prev) => ({ ...prev, images: [...prev.images, url] }));
   }
 
+  const latestVideoUrl = useRef(form.tiktokUrl);
+  latestVideoUrl.current = form.tiktokUrl;
+  const coverRequest = useRef(0);
+
   async function handleFetchCover() {
     const url = form.tiktokUrl.trim();
     if (!url) return;
+    const request = ++coverRequest.current;
     setCoverStatus("loading");
     setCoverMessage(null);
     try {
       const result = await fetchTikTokCover(url);
+      if (request !== coverRequest.current || latestVideoUrl.current.trim() !== url) return;
       setForm((prev) => ({
         ...prev,
         images: [result.data.thumbnailUrl, ...prev.images.filter((img) => img !== result.data.thumbnailUrl)],
@@ -203,6 +209,7 @@ export function useListingFormState(category: Category, property?: PropertyDTO) 
       setCoverStatus("success");
       setCoverMessage(t("form.coverFetched"));
     } catch (err) {
+      if (request !== coverRequest.current || latestVideoUrl.current.trim() !== url) return;
       setCoverStatus("error");
       setCoverMessage(err instanceof ApiClientError ? err.message : t("form.coverFetchError"));
     }

@@ -1,4 +1,5 @@
 "use client";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -77,7 +78,7 @@ export default function OrdersPage() {
           onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
           className="input-field flex-1 min-w-[200px]"
         />
-        <select
+        <SelectDropdown
           value={filters.category ?? ""}
           onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value as OrderFilters["category"] }))}
           className="input-field sm:w-44"
@@ -86,8 +87,8 @@ export default function OrdersPage() {
           <option value="apartment">{t("filters.apartment")}</option>
           <option value="build">{t("filters.build")}</option>
           <option value="land">{t("filters.land")}</option>
-        </select>
-        <select
+        </SelectDropdown>
+        <SelectDropdown
           value={filters.status ?? ""}
           onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value as OrderFilters["status"] }))}
           className="input-field sm:w-44"
@@ -97,7 +98,7 @@ export default function OrdersPage() {
           <option value="contacted">{t("orders.statusContacted")}</option>
           <option value="fulfilled">{t("orders.statusFulfilled")}</option>
           <option value="cancelled">{t("orders.statusCancelled")}</option>
-        </select>
+        </SelectDropdown>
       </div>
 
       {status === "loading" && <LoadingRow />}

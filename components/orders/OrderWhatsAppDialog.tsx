@@ -1,4 +1,5 @@
 "use client";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { useEffect, useRef, useState } from "react";
 import type { OrderDTO } from "@/types/order";
 import type { WhatsAppGroup } from "@/lib/openwa-groups";
@@ -49,9 +50,9 @@ export function OrderWhatsAppDialog({ order, onClose }: { order: OrderDTO; onClo
     <div className="flex items-center justify-between gap-4"><h2 id="order-whatsapp-title" className="text-lg font-semibold">{t('orders.sendGroup')}</h2><button type="button" className="btn-secondary" disabled={busy} onClick={onClose}>{t('common.close')}</button></div>
     <p className="mt-2 text-sm text-ink-500">{t('orders.directHint')}</p>
     <form onSubmit={send} className="mt-5 space-y-4">
-      <label className="block text-sm">{t('orders.chooseGroup')}<select required className="input-field mt-2" value={groupId} disabled={loading || loadError || busy || locked} onChange={event => setGroupId(event.target.value)}><option value="">{t(loading ? 'orders.groupsLoading' : 'orders.chooseGroup')}</option>{groups.map(group => <option key={group.id} value={group.id}>{group.name}</option>)}</select></label>
+      <label className="block text-sm">{t('orders.chooseGroup')}<SelectDropdown required className="input-field mt-2" value={groupId} disabled={loading || loadError || busy || locked} onChange={event => setGroupId(event.target.value)}><option value="">{t(loading ? 'orders.groupsLoading' : 'orders.chooseGroup')}</option>{groups.map(group => <option key={group.id} value={group.id}>{group.name}</option>)}</SelectDropdown></label>
       {loadError ? <p role="alert" className="text-sm text-rust-500">{t('orders.groupsFailed')} <button type="button" className="underline" onClick={() => setAttempt(value => value + 1)}>{t('offer.retry')}</button></p> : !loading && groups.length === 0 ? <p role="status" className="text-sm">{t('orders.noGroups')}</p> : null}
-      <label className="block text-sm">{t('property.messageLanguage')}<select className="input-field mt-2" value={language} disabled={busy || locked} onChange={event => setLanguage(event.target.value as 'en' | 'ar')}><option value="ar">العربية</option><option value="en">English</option></select></label>
+      <label className="block text-sm">{t('property.messageLanguage')}<SelectDropdown className="input-field mt-2" value={language} disabled={busy || locked} onChange={event => setLanguage(event.target.value as 'en' | 'ar')}><option value="ar">العربية</option><option value="en">English</option></SelectDropdown></label>
       <p className="text-xs font-semibold">{t('property.messagePreview')}</p><p dir={language === 'ar' ? 'rtl' : 'ltr'} className="max-h-64 overflow-y-auto whitespace-pre-wrap break-words rounded-xl bg-stone-50 p-4 text-sm leading-relaxed">{orderWhatsAppMessage(order, language)}</p>
       {notice && <p role="status" className="text-sm">{t(`property.${notice}`)}</p>}
       <button type="submit" disabled={!groupId || loading || loadError || busy || locked} className="btn-primary">{t(busy ? 'property.sendingProperty' : 'orders.sendGroup')}</button>

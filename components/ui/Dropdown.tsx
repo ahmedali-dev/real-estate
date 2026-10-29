@@ -12,7 +12,7 @@ export function Dropdown({ label, children }: { label: string; children: ReactNo
     if (!position) return;
     function outside(event: PointerEvent) { if (!panel.current?.contains(event.target as Node) && !trigger.current?.contains(event.target as Node)) setPosition(null); }
     function escape(event: KeyboardEvent) { if (event.key === "Escape") { setPosition(null); trigger.current?.focus(); } }
-    function close() { setPosition(null); }
+    function close(event: Event) { if (!panel.current?.contains(event.target as Node)) setPosition(null); }
     document.addEventListener("pointerdown", outside);
     document.addEventListener("keydown", escape);
     window.addEventListener("resize", close);

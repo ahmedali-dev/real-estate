@@ -241,3 +241,53 @@ button, a, summary, input, select, textarea { -webkit-tap-highlight-color: trans
 @media (min-width:1024px) and (max-width:1200px) { .estate-header-inner { padding-inline: 20px; gap: 12px; } .estate-public-nav > a, .estate-nav-dropdown > summary { gap: 5px; padding-inline: 7px; } .estate-brand strong { font-size: 14px; } .estate-staff-link { padding-inline: 12px; font-size: 12px; } }
 .estate-dropdown-chevron { margin-inline-start: 2px; transition: transform 160ms ease; }
 .estate-nav-dropdown[open] > summary .estate-dropdown-chevron { transform: rotate(180deg); }
+
+/* Shared custom form dropdowns. */
+.select-dropdown { position:relative; display:inline-block; max-width:100%; vertical-align:middle; min-width:0; }
+.select-dropdown-field { display:block; width:100%; }
+.select-dropdown-native { position:absolute; width:1px; height:1px; padding:0; margin:0; opacity:0; pointer-events:none; inset-inline-start:0; bottom:0; }
+.select-dropdown-trigger { display:inline-flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; text-align:start; }
+.select-dropdown-trigger:disabled { opacity:.55; cursor:not-allowed; }
+.select-dropdown-trigger[aria-expanded="true"] { border-color:var(--estate-action); box-shadow:0 0 0 3px #a7684e20; }
+.select-dropdown-trigger[aria-invalid="true"] { border-color:#b94536; }
+.select-dropdown-options { background:white; color:var(--estate-ink); border:1px solid var(--estate-line); border-radius:12px; box-shadow:0 16px 48px #241a1924; padding:6px; overflow-y:auto; overscroll-behavior:contain; font-size:14px; }
+.select-dropdown-option { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:42px; padding:10px 12px; border-radius:8px; cursor:pointer; }
+.select-dropdown-option[data-active="true"] { background:#f4ece5; }
+.select-dropdown-option[aria-selected="true"] { color:var(--estate-action); font-weight:600; }
+.select-dropdown-option[aria-disabled="true"] { opacity:.45; cursor:not-allowed; }
+.courtyard-filter-main>label>.select-dropdown { width:100%; }
+
+/* Supplied brand artwork, with transparent margins kept within its frame. */
+.estate-logo { position:relative; display:inline-block; width:120px; height:154px; overflow:hidden; flex-shrink:0; vertical-align:middle; }
+.estate-logo-image { position:absolute; left:50%; top:50%; width:220%; height:auto; max-width:none; transform:translate(-51%, -56%); }
+.estate-logo-compact { width:64px; height:82px; }
+.estate-sidebar nav .estate-sidebar-brand, .estate-mobile-drawer nav .estate-sidebar-brand { justify-content:center; padding:12px; background:transparent; border-radius:14px; }
+.estate-brand-caption { max-width:140px; }
+@media(max-width:640px){.estate-brand-caption{display:none}.estate-logo-compact{width:48px;height:62px}}
+
+/* Desktop sidebar rail and logo panel. Mobile keeps its full navigation drawer. */
+.estate-sidebar { transition:width 180ms ease; }
+.estate-sidebar.is-collapsed { width:84px; }
+.estate-sidebar-toggle { display:grid; place-items:center; width:32px; height:32px; border:1px solid #766154; border-radius:8px; color:#fff; background:transparent; }
+.estate-sidebar-toggle:hover { background:#4d3a2f; }
+.estate-sidebar-toggle:focus-visible,.estate-rail-action:focus-visible { outline:2px solid #e7c597; outline-offset:3px; }
+.estate-sidebar nav .estate-sidebar-brand,.estate-mobile-drawer nav .estate-sidebar-brand { flex-shrink:0; min-height:174px; background:transparent; }
+.estate-sidebar nav .estate-sidebar-brand:hover,.estate-mobile-drawer nav .estate-sidebar-brand:hover { background:transparent; }
+.estate-sidebar.is-collapsed nav.estate-sidebar-rail { padding:16px 10px; gap:12px; }
+.estate-sidebar.is-collapsed nav .estate-sidebar-brand { padding:4px; min-height:74px; width:64px; }
+.estate-sidebar-rail .estate-logo-compact { width:48px; height:62px; }
+.estate-rail-action { display:flex; align-items:center; justify-content:center; gap:2px; width:44px; height:44px; flex-shrink:0; border-radius:10px; color:#e8d8c8; background:transparent; }
+.estate-rail-action:hover { background:#4d3a2f; }
+@media(prefers-reduced-motion:reduce){.estate-sidebar{transition:none}}
+
+/* A compact, consistent logo and predictable icon sizing in either sidebar state. */
+.estate-sidebar nav .estate-sidebar-brand,.estate-mobile-drawer nav .estate-sidebar-brand { min-height:104px; padding:8px; border-radius:10px; }
+.estate-sidebar .estate-logo,.estate-mobile-drawer .estate-logo { width:64px; height:82px; }
+.estate-sidebar.is-collapsed nav .estate-sidebar-brand { min-height:60px; width:52px; padding:4px; }
+.estate-sidebar-rail .estate-logo-compact { width:36px; height:46px; }
+.estate-sidebar nav a svg,.estate-sidebar nav summary svg,.estate-sidebar nav button svg { width:20px; height:20px; flex-shrink:0; }
+.estate-sidebar-toggle { width:36px; height:36px; border-color:#ffffff25; background:#ffffff0a; border-radius:10px; transition:background 150ms ease,border-color 150ms ease; }
+.estate-sidebar-toggle svg { width:18px; height:18px; }
+.estate-sidebar-toggle:hover { background:#ffffff18; border-color:#ffffff60; }
+.estate-sidebar { transition:width 200ms ease; }
+@media(prefers-reduced-motion:reduce){.estate-sidebar,.estate-sidebar-toggle{transition:none}}

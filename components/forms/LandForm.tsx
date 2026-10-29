@@ -4,6 +4,7 @@ import { EditorialListingForm } from "@/components/forms/EditorialListingForm";
 import type { PropertyDTO } from "@/types/property";
 import { useListingFormState } from "@/lib/forms/useListingFormState";
 import { AvailabilityField, PriceField } from "@/components/forms/fields/ListingControls";
+import { OfferFields } from "@/components/forms/fields/OfferFields";
 import { OwnerFields } from "@/components/forms/fields/OwnerFields";
 import { LocationFields } from "@/components/forms/fields/LocationFields";
 import { ImagesAndVideoFields } from "@/components/forms/fields/ImagesAndVideoFields";
@@ -54,6 +55,8 @@ export function LandForm({ property }: { property?: PropertyDTO }) {
           <input className="input-field" value={t("form.saleOnly")} disabled />
           <p className="mt-1.5 text-xs text-ink-400">{t("form.saleOnlyNote")}</p>
         </div>
+
+        <OfferFields form={form} update={update} errors={errors} existingUser={property?.broughtBy} showPropertyType={false} />
 
         <PriceField form={form} update={update} errors={errors} t={t} />
 

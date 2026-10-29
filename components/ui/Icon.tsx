@@ -1,6 +1,8 @@
 import type { SVGProps } from "react";
 
 const paths = {
+  sidebarExpand: "M3 4h18v16H3zM8 4v16M12 9l3 3-3 3",
+  sidebarCollapse: "M3 4h18v16H3zM8 4v16M16 9l-3 3 3 3",
   chevronDown: "m6 9 6 6 6-6",
   menu: "M4 6h16M4 12h16M4 18h16",
   copy: "M9 9h12v12H9zM15 9V3H3v12h6",

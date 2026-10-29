@@ -1,4 +1,5 @@
 "use client";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { useEffect, useRef, useState } from "react";
 import { LocationMap } from "./LocationMap";
 import { isGoogleMapsUrl } from "@/lib/maps";
@@ -48,7 +49,7 @@ export function PropertyQuickEdit({ property, field, onClose, onSaved }: { prope
     <form onSubmit={save} className="mt-5 space-y-4">
       <fieldset disabled={busy} className="space-y-4">
         {field === "price" && <label className="block text-sm">{ar ? "السعر (ر.س) — اختياري" : "Price (SAR) — optional"}<input autoFocus type="number" min="0.01" step="any" value={price} onChange={e => setPrice(e.target.value)} className="input-field mt-2" /></label>}
-        {field === "status" && <label className="block text-sm">{ar ? "حالة العقار" : "Availability"}<select autoFocus value={status} onChange={e => setStatus(e.target.value as PropertyDTO["status"])} className="input-field mt-2"><option value="available">{ar ? "متاح" : "Available"}</option>{property.listingType === "rent" ? <option value="rented">{ar ? "مؤجر" : "Rented"}</option> : <option value="sold">{ar ? "مباع" : "Sold"}</option>}</select></label>}
+        {field === "status" && <label className="block text-sm">{ar ? "حالة العقار" : "Availability"}<SelectDropdown autoFocus value={status} onChange={e => setStatus(e.target.value as PropertyDTO["status"])} className="input-field mt-2"><option value="available">{ar ? "متاح" : "Available"}</option>{property.listingType === "rent" ? <option value="rented">{ar ? "مؤجر" : "Rented"}</option> : <option value="sold">{ar ? "مباع" : "Sold"}</option>}</SelectDropdown></label>}
         {field === "tiktokUrl" && <label className="block text-sm">{ar ? "رابط فيديو TikTok" : "TikTok video URL"}<input autoFocus type="url" dir="ltr" value={tiktokUrl} onChange={e => setTikTok(e.target.value)} className="input-field mt-2" /></label>}
         {field === "mapUrl" && <label className="block text-sm">{ar ? "رابط الموقع على خرائط Google" : "Google Maps location URL"}<input autoFocus type="url" dir="ltr" value={mapUrl} onChange={e => setMap(e.target.value)} className="input-field mt-2" /></label>}
         {field === "mapUrl" && <p className="text-xs text-ink-500">{ar ? "الصق رابط الموقع من خرائط Google. ستظهر معاينة الخريطة أدناه." : "Paste the location link from Google Maps. A map preview appears below."}</p>}

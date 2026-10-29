@@ -1,4 +1,5 @@
 "use client";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 
 import Link from "next/link";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -108,7 +109,7 @@ export function ListingsTable({
               <button type="button" disabled={!chosen.length} className="btn-secondary" onClick={() => setSelected([])}>{locale === "ar" ? "إلغاء التحديد" : "Clear selection"}</button>
             </Dropdown>
             <Dropdown label={locale === "ar" ? "المشاركة والنسخ" : "Share & copy"}>
-              <label className="text-xs font-semibold">{locale === "ar" ? "لغة الرسالة" : "Message language"}<select value={language} onChange={e => setLanguage(e.target.value as "ar" | "en")} className="input-field mt-2"><option value="ar">العربية</option><option value="en">English</option></select></label>
+              <label className="text-xs font-semibold">{locale === "ar" ? "لغة الرسالة" : "Message language"}<SelectDropdown value={language} onChange={e => setLanguage(e.target.value as "ar" | "en")} className="input-field mt-2"><option value="ar">العربية</option><option value="en">English</option></SelectDropdown></label>
               <CopyButton text={message} label={locale === "ar" ? "نسخ العقارات المحددة" : "Copy selected properties"} />
               {message ? <a href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className="btn-primary"><Icon name="whatsapp" className="h-4 w-4" />{locale === "ar" ? "مشاركة واتساب" : "Share on WhatsApp"}</a> : <button type="button" disabled className="btn-primary opacity-40">{locale === "ar" ? "مشاركة واتساب" : "Share on WhatsApp"}</button>}
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" role="switch" checked={shareImages} onChange={e => imagePreference("share", e.target.checked)} />{locale === "ar" ? "تضمين روابط الصور" : "Include image links"}</label>
@@ -168,7 +169,7 @@ export function ListingsTable({
                   )}
                 </td>
                 <td className="px-4 py-3">
-                  <select
+                  <SelectDropdown
                     value={p.visibility}
                     onChange={(e) => handleVisibilityToggle(p, e.target.value as Visibility)}
                     className={`rounded-full border-0 px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
@@ -177,7 +178,7 @@ export function ListingsTable({
                   >
                     <option value="public">{t("form.visibilityPublic")}</option>
                     <option value="private">{t("form.visibilityPrivate")}</option>
-                  </select>
+                  </SelectDropdown>
                 </td>
                 <td className="px-4 py-3 font-medium text-ink-700">
                   {formatPriceWithPeriod(p.price, p.listingType, p.rentalPeriod, t, locale)}
@@ -215,5 +216,5 @@ function ListingThumbnail({ url, title }: { url: string; title: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) return <Icon name="home" className="h-6 w-6 text-ink-300" />;
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={url} alt={title} loading="lazy" onError={() => setFailed(true)} className="h-full w-full object-contain" />;
+  return <img src={url} alt={title} loading="lazy" decoding="async" onError={() => setFailed(true)} className="h-full w-full object-contain" />;
 }

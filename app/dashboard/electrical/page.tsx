@@ -1,4 +1,5 @@
 "use client";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 
 import { useCallback, useEffect, useState } from "react";
 import { useRequireRole } from "@/lib/auth/useRequireRole";
@@ -130,7 +131,7 @@ export default function ElectricalMonitoringPage() {
             </p>
           )}
           {metersStatus === "ready" && meters.length > 0 && (
-            <select
+            <SelectDropdown
               value={selected}
               onChange={(e) => setSelected(e.target.value)}
               className="rounded-md border border-wv-border bg-wv-surface px-3 py-2 text-sm text-wv-text sm:w-96"
@@ -140,7 +141,7 @@ export default function ElectricalMonitoringPage() {
                   {meterLabel(m)}
                 </option>
               ))}
-            </select>
+            </SelectDropdown>
           )}
         </div>
 
