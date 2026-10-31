@@ -111,7 +111,7 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
       details.residencyType != null);
   const units = property.units ?? [];
   const canQuickEdit = Boolean(session?.user && ["admin", "real_estate_officer", "project_manager"].includes(session.user.role) && (session.user.role !== "project_manager" || property.category === "build"));
-  const editLabel = (field: QuickEditField) => ({ price: locale === "ar" ? "تعديل السعر" : "Edit price", status: locale === "ar" ? "تعديل الحالة" : "Edit availability", tiktokUrl: locale === "ar" ? "تعديل رابط TikTok" : "Edit TikTok link", mapUrl: locale === "ar" ? "تعديل الموقع" : "Edit location" })[field];
+  const editLabel = (field: QuickEditField) => ({ description: locale === "ar" ? "تعديل الوصف" : "Edit description", price: locale === "ar" ? "تعديل السعر" : "Edit price", status: locale === "ar" ? "تعديل الحالة" : "Edit availability", tiktokUrl: locale === "ar" ? "تعديل رابط TikTok" : "Edit TikTok link", mapUrl: locale === "ar" ? "تعديل الموقع" : "Edit location" })[field];
   const canSendFromOffice = Boolean(session?.user && ["admin", "real_estate_officer", "project_manager"].includes(session.user.role) &&
     (session.user.role !== "project_manager" || property.category === "build") && property.visibility === "public");
 

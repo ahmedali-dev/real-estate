@@ -6,16 +6,17 @@ import { isGoogleMapsUrl } from "@/lib/maps";
 import type { PropertyDTO } from "@/types/property";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
-export type QuickEditField = "price" | "status" | "tiktokUrl" | "mapUrl";
+export type QuickEditField = "price" | "status" | "tiktokUrl" | "mapUrl" | "description";
 
 export function PropertyQuickEdit({ property, field, onClose, onSaved }: { property: PropertyDTO; field: QuickEditField; onClose: () => void; onSaved: (property: PropertyDTO) => void }) {
   const { locale } = useLanguage();
   const ar = locale === "ar";
-  const labels = { price: ar ? "تعديل السعر" : "Edit price", status: ar ? "تعديل حالة العقار" : "Edit availability", tiktokUrl: ar ? "تعديل رابط TikTok" : "Edit TikTok link", mapUrl: ar ? "تعديل الموقع" : "Edit location" };
+  const labels = { description: ar ? "تعديل الوصف" : "Edit description", price: ar ? "تعديل السعر" : "Edit price", status: ar ? "تعديل حالة العقار" : "Edit availability", tiktokUrl: ar ? "تعديل رابط TikTok" : "Edit TikTok link", mapUrl: ar ? "تعديل الموقع" : "Edit location" };
   const dialog = useRef<HTMLDialogElement>(null);
   const saving = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [description, setDescription] = useState(property.description);
   const [price, setPrice] = useState(property.price?.toString() || "");
   const [status, setStatus] = useState(property.status);
   const [tiktokUrl, setTikTok] = useState(property.tiktokUrl || "");
@@ -30,6 +31,7 @@ export function PropertyQuickEdit({ property, field, onClose, onSaved }: { prope
     event.preventDefault(); if (saving.current) return;
     saving.current = true; setBusy(true); setError("");
     const changes: Record<string, unknown> = {};
+    if (field === "description" && description !== property.description) changes.description = description;
     if (field === "price" && price !== (property.price?.toString() || "")) changes.price = price.trim() ? Number(price) : null;
     if (field === "status" && status !== property.status) changes.status = status;
     if (field === "tiktokUrl" && tiktokUrl !== (property.tiktokUrl || "")) changes.tiktokUrl = tiktokUrl;
@@ -48,6 +50,7 @@ export function PropertyQuickEdit({ property, field, onClose, onSaved }: { prope
     <p className="mt-2 border-b border-ink-100 pb-5 text-sm text-ink-500">{property.title}</p>
     <form onSubmit={save} className="mt-5 space-y-4">
       <fieldset disabled={busy} className="space-y-4">
+        {field === "description" && <label className="block text-sm">{ar ? "الوصف" : "Description"}<textarea autoFocus dir="auto" required minLength={10} maxLength={5000} value={description} onChange={event => setDescription(event.target.value)} className="input-field mt-2 min-h-[180px]" /></label>}
         {field === "price" && <label className="block text-sm">{ar ? "السعر (ر.س) — اختياري" : "Price (SAR) — optional"}<input autoFocus type="number" min="0.01" step="any" value={price} onChange={e => setPrice(e.target.value)} className="input-field mt-2" /></label>}
         {field === "status" && <label className="block text-sm">{ar ? "حالة العقار" : "Availability"}<SelectDropdown autoFocus value={status} onChange={e => setStatus(e.target.value as PropertyDTO["status"])} className="input-field mt-2"><option value="available">{ar ? "متاح" : "Available"}</option>{property.listingType === "rent" ? <option value="rented">{ar ? "مؤجر" : "Rented"}</option> : <option value="sold">{ar ? "مباع" : "Sold"}</option>}</SelectDropdown></label>}
         {field === "tiktokUrl" && <label className="block text-sm">{ar ? "رابط فيديو TikTok" : "TikTok video URL"}<input autoFocus type="url" dir="ltr" value={tiktokUrl} onChange={e => setTikTok(e.target.value)} className="input-field mt-2" /></label>}

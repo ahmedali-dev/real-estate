@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { PropertyQuickEdit, type QuickEditField } from "./PropertyQuickEdit";
 import Link from "next/link";
 import type { PropertyDTO } from "@/types/property";
 import { Icon } from "@/components/ui/Icon";
@@ -14,15 +16,23 @@ import { propertyLocationUrl } from "@/lib/property-share";
 import { useSession } from "next-auth/react";
 
 export function PropertyQuickView({ property: initialProperty, onClose }: { property: PropertyDTO; onClose: () => void }) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const router = useRouter();
+  const [editField, setEditField] = useState<QuickEditField | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [property, setProperty] = useState(initialProperty);
   const [loadFailed, setLoadFailed] = useState(false);
   useEffect(() => {
     let active = true;
-    fetchProperty(initialProperty._id).then(result => { if (active) setProperty(result.data); }).catch(() => { if (active) setLoadFailed(true); });
+    fetchProperty(initialProperty._id).then(result => { if (active) { setProperty(result.data); setLoaded(true); } }).catch(() => { if (active) setLoadFailed(true); });
     return () => { active = false; };
   }, [initialProperty._id]);
   const { data: session } = useSession();
+  const canEdit = loaded && (session?.user.role === "admin" || session?.user.role === "real_estate_officer" || (session?.user.role === "project_manager" && property.category === "build"));
+  function editButton(field: QuickEditField) {
+    const labels = { description: locale === "ar" ? "تعديل الوصف" : "Edit description", tiktokUrl: locale === "ar" ? "تعديل رابط TikTok" : "Edit TikTok link", mapUrl: locale === "ar" ? "تعديل الموقع" : "Edit location", price: "", status: "" };
+    return canEdit && <button type="button" className="property-icon-action" aria-label={labels[field]} title={labels[field]} onClick={() => setEditField(field)}><Icon name="edit" className="h-4 w-4" /></button>;
+  }
   const dialog = useRef<HTMLDialogElement>(null);
   const [image, setImage] = useState(0);
   const location = propertyLocationUrl(property);
@@ -32,7 +42,7 @@ export function PropertyQuickView({ property: initialProperty, onClose }: { prop
     dialog.current?.showModal();
     return () => { document.body.style.overflow = previous; };
   }, []);
-  return <dialog ref={dialog} aria-labelledby="quick-view-title" onCancel={event => { event.preventDefault(); onClose(); }} className="property-quick-view">
+  return <dialog ref={dialog} aria-labelledby="quick-view-title" onCancel={event => { event.preventDefault(); if (!editField) onClose(); }} className="property-quick-view">
     <header className="flex items-center justify-between gap-4 border-b border-ink-100 p-4"><span className="text-sm font-semibold">{t("property.quickView")}</span><button type="button" autoFocus onClick={onClose} aria-label={t("common.close")} className="property-icon-action"><Icon name="close" /></button></header>
     {loadFailed && <p role="status" className="px-5 pt-3 text-sm text-ink-500">{t("property.quickViewLoadFailed")}</p>}
     <div className="quick-view-content">
@@ -56,14 +66,15 @@ export function PropertyQuickView({ property: initialProperty, onClose }: { prop
           {property.category !== "land" && property.details?.bathrooms != null && <span>{property.details.bathrooms} {t("property.bathrooms")}</span>}
           {property.category === "build" && property.units.length > 0 && <span>{property.units.length} {t("property.unitsSection")}</span>}
         </div>
-        <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">{t("property.description")}</h3><CopyButton text={property.description} label={t("property.copyDescription")} /></div>
+        <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">{t("property.description")}</h3><div className="flex items-center gap-1">{editButton("description")}<CopyButton text={property.description} label={t("property.copyDescription")} /></div></div>
         <p dir="auto" className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-ink-600">{property.description}</p>
         {session?.user && !property.owner && <p className="mt-5 text-sm text-ink-500">{t("property.ownerNotProvided")}</p>}
         {session?.user && property.owner && <div className="mt-5 border-t border-ink-100 pt-4"><div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">{t("property.ownerContact")}</h3><CopyButton text={[property.owner.name, property.owner.phone, property.owner.email, property.owner.notes].filter(Boolean).join("\n")} label={t("property.copyOwner")} /></div><p className="mt-2 whitespace-pre-line text-sm text-ink-600">{[property.owner.name, property.owner.phone, property.owner.email, property.owner.notes].filter(Boolean).join("\n")}</p></div>}
-        {location && <div className="mt-4 flex items-center justify-between gap-2"><a href={location} target="_blank" rel="noopener noreferrer" className="text-sm text-moss-600 underline">{t("property.openLocation")}</a><CopyButton text={location} label={t("property.copyLocation")} /></div>}
-        {property.tiktokUrl && <div className="mt-3 flex items-center justify-between gap-2"><a href={property.tiktokUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-moss-600 underline">{t("property.watchOnTikTok")}</a><CopyButton text={property.tiktokUrl} label={t("property.copyTikTok")} /></div>}
+        {(location || canEdit) && <div className="mt-4 flex items-center justify-between gap-2">{location ? <a href={location} target="_blank" rel="noopener noreferrer" className="text-sm text-moss-600 underline">{t("property.openLocation")}</a> : <span className="text-sm text-ink-500">{locale === "ar" ? "الموقع غير مضاف" : "No location added"}</span>}<div className="flex items-center gap-1">{editButton("mapUrl")}{location && <CopyButton text={location} label={t("property.copyLocation")} />}</div></div>}
+        {(property.tiktokUrl || canEdit) && <div className="mt-3 flex items-center justify-between gap-2">{property.tiktokUrl ? <a href={property.tiktokUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-moss-600 underline">{t("property.watchOnTikTok")}</a> : <span className="text-sm text-ink-500">{locale === "ar" ? "رابط TikTok غير مضاف" : "No TikTok link added"}</span>}<div className="flex items-center gap-1">{editButton("tiktokUrl")}{property.tiktokUrl && <CopyButton text={property.tiktokUrl} label={t("property.copyTikTok")} />}</div></div>}
       </div>
     </div>
     <footer className="flex justify-end border-t border-ink-100 p-4"><Link href={`/properties/${property._id}`} className="btn-primary" onClick={onClose}>{t("courtyard.viewProperty")}<Icon name="arrow" className="h-4 w-4" /></Link></footer>
+    {editField && <PropertyQuickEdit key={editField} property={property} field={editField} onClose={() => setEditField(null)} onSaved={updated => { setProperty(updated); router.refresh(); }} />}
   </dialog>;
 }

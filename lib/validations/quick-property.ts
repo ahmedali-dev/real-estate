@@ -2,6 +2,7 @@ import { z } from "zod";
 import { isGoogleMapsUrl } from "@/lib/maps";
 
 export const quickPropertySchema = z.object({
+  description: z.string().trim().min(10, "Description must be at least 10 characters.").max(5000).optional(),
   price: z.number().positive().finite().nullable().optional(),
   status: z.enum(["available", "sold", "rented"]).optional(),
   tiktokUrl: z.string().trim().max(4096).refine(value => {

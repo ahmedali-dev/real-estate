@@ -194,6 +194,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const unset: Record<string, string> = {};
     if ("price" in data) { if (data.price === null) unset.price = ""; else set.price = data.price; }
     if (data.status) set.status = data.status;
+    if (data.description !== undefined) set.description = data.description;
     if ("tiktokUrl" in data) { if (data.tiktokUrl) set.tiktokUrl = data.tiktokUrl; else unset.tiktokUrl = ""; }
     if ("mapUrl" in data) { if (data.mapUrl) set["location.mapUrl"] = data.mapUrl; else unset["location.mapUrl"] = ""; }
     const updated = await Property.findOneAndUpdate({ _id: params.id, listingType: doc.listingType, category: doc.category }, { $set: set, $unset: unset }, { new: true, runValidators: true });
