@@ -73,7 +73,6 @@ function ListingsBrowserContent({
     } catch {
       if (id === requestId.current) setStatus("error");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fixedCategory, page]);
 
   useEffect(() => {

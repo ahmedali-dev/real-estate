@@ -5,8 +5,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #FAF5EE;
-  --foreground: #2B1F19;
+  --background: #f7f9f9;
+  --foreground: #0f1419;
   --font-display: "Readex Pro", "Segoe UI", sans-serif;
   --font-fraunces: var(--font-display);
   --font-body: "IBM Plex Sans Arabic", "Segoe UI", sans-serif;

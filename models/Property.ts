@@ -249,11 +249,11 @@ PropertySchema.pre("validate", function (next) {
 // Guard findOneAndUpdate / findByIdAndUpdate paths too, since pre('validate')
 // on the document does not run for query-based updates by default.
 PropertySchema.pre("findOneAndUpdate", function (next) {
-  const update = this.getUpdate() as Record<string, any> | null;
+  const update = this.getUpdate() as Record<string, unknown> | null;
   if (!update) return next();
 
-  const flat: Record<string, any> = update.$set ?? update;
-  const unset: Record<string, string> = { ...(update.$unset ?? {}) };
+  const flat = (update.$set ?? update) as Record<string, unknown>;
+  const unset: Record<string, string> = { ...((update.$unset ?? {}) as Record<string, string>) };
 
   if (flat.category === "land") {
     if (flat.listingType && flat.listingType !== "sale") {
@@ -278,18 +278,20 @@ PropertySchema.pre("findOneAndUpdate", function (next) {
     delete flat.tenant;
     unset.tenant = "";
     if (Array.isArray(flat.units)) {
-      flat.units = flat.units.map((u: Record<string, any>) => {
+      flat.units = flat.units.map((u: Record<string, unknown>) => {
         if (u.isRented === true) return u;
-        const { tenant, ...rest } = u;
+        const rest = { ...u };
+        delete rest.tenant;
         return rest;
       });
     }
   }
 
   if (Array.isArray(flat.units)) {
-    flat.units = flat.units.map((u: Record<string, any>) => {
+    flat.units = flat.units.map((u: Record<string, unknown>) => {
       if (u.isRented !== false) return u;
-      const { tenant, ...rest } = u;
+      const rest = { ...u };
+        delete rest.tenant;
       return rest;
     });
   }

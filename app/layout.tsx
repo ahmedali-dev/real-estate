@@ -1,13 +1,17 @@
 import { listingKeywords } from "@/lib/seo/keywords";
 import { configuredPublicSiteOrigin } from "@/lib/site-url";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./redesign.css";
 import { AppShell } from "@/components/ui/AppShell";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { AuthSessionProvider } from "@/components/auth/AuthSessionProvider";
 
+export const viewport: Viewport = { themeColor: "#1d9bf0", width: "device-width", initialScale: 1 };
+
 export const metadata: Metadata = {
+  applicationName: "41 Real Estate",
+  appleWebApp: { capable: true, title: "41 Real Estate", statusBarStyle: "default" },
   keywords: listingKeywords(),
   metadataBase: new URL(configuredPublicSiteOrigin() || process.env.NEXTAUTH_URL || "http://localhost:3000"),
   title: {

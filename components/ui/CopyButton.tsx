@@ -6,7 +6,7 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 export function CopyButton({ text, label }: { text: string; label: string }) {
   const { t } = useLanguage();
   const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
   async function copy() {
     clearTimeout(timer.current);

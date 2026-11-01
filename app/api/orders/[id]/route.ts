@@ -13,35 +13,35 @@ function isValidId(id: string) {
 }
 
 // GET /api/orders/:id
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { response: authError } = await requireOrdersAccess();
   if (authError) return authError;
 
   try {
-    if (!isValidId(params.id)) {
+    if (!isValidId((await params).id)) {
       return NextResponse.json({ error: "Invalid order id." }, { status: 400 });
     }
     await connectToDatabase();
 
-    const doc = await Order.findById(params.id);
+    const doc = await Order.findById((await params).id);
     if (!doc) {
       return NextResponse.json({ error: "Order not found." }, { status: 404 });
     }
 
     return NextResponse.json({ data: serializeOrder(doc) }, { status: 200 });
   } catch (err) {
-    console.error(`GET /api/orders/${params.id} failed:`, err);
+    console.error(`GET /api/orders/${(await params).id} failed:`, err);
     return NextResponse.json({ error: "Failed to load order." }, { status: 500 });
   }
 }
 
 // PUT /api/orders/:id
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { response: authError } = await requireOrdersAccess();
   if (authError) return authError;
 
   try {
-    if (!isValidId(params.id)) {
+    if (!isValidId((await params).id)) {
       return NextResponse.json({ error: "Invalid order id." }, { status: 400 });
     }
     await connectToDatabase();
@@ -64,7 +64,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     };
 
     const updated = await Order.findByIdAndUpdate(
-      params.id,
+      (await params).id,
       {
         $set: payload,
         $unset: payload.requestedListingType ? {} : { requestedListingType: "" },
@@ -78,30 +78,30 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json({ data: serializeOrder(updated) }, { status: 200 });
   } catch (err) {
-    console.error(`PUT /api/orders/${params.id} failed:`, err);
+    console.error(`PUT /api/orders/${(await params).id} failed:`, err);
     return NextResponse.json({ error: "Failed to update order." }, { status: 500 });
   }
 }
 
 // DELETE /api/orders/:id
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { response: authError } = await requireAdmin();
   if (authError) return authError;
 
   try {
-    if (!isValidId(params.id)) {
+    if (!isValidId((await params).id)) {
       return NextResponse.json({ error: "Invalid order id." }, { status: 400 });
     }
     await connectToDatabase();
 
-    const deleted = await Order.findByIdAndDelete(params.id);
+    const deleted = await Order.findByIdAndDelete((await params).id);
     if (!deleted) {
       return NextResponse.json({ error: "Order not found." }, { status: 404 });
     }
 
-    return NextResponse.json({ data: { _id: params.id } }, { status: 200 });
+    return NextResponse.json({ data: { _id: (await params).id } }, { status: 200 });
   } catch (err) {
-    console.error(`DELETE /api/orders/${params.id} failed:`, err);
+    console.error(`DELETE /api/orders/${(await params).id} failed:`, err);
     return NextResponse.json({ error: "Failed to delete order." }, { status: 500 });
   }
 }

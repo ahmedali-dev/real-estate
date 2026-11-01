@@ -30,7 +30,7 @@ export function PropertyQuickView({ property: initialProperty, onClose }: { prop
   const { data: session } = useSession();
   const canEdit = loaded && (session?.user.role === "admin" || session?.user.role === "real_estate_officer" || (session?.user.role === "project_manager" && property.category === "build"));
   function editButton(field: QuickEditField) {
-    const labels = { description: locale === "ar" ? "تعديل الوصف" : "Edit description", tiktokUrl: locale === "ar" ? "تعديل رابط TikTok" : "Edit TikTok link", mapUrl: locale === "ar" ? "تعديل الموقع" : "Edit location", price: "", status: "" };
+    const labels = { description: locale === "ar" ? "تعديل الوصف" : "Edit description", tiktokUrl: locale === "ar" ? "تعديل رابط TikTok" : "Edit TikTok link", mapUrl: locale === "ar" ? "تعديل الموقع" : "Edit location", price: locale === "ar" ? "تعديل السعر" : "Edit price", status: "" };
     return canEdit && <button type="button" className="property-icon-action" aria-label={labels[field]} title={labels[field]} onClick={() => setEditField(field)}><Icon name="edit" className="h-4 w-4" /></button>;
   }
   const dialog = useRef<HTMLDialogElement>(null);
@@ -59,7 +59,7 @@ export function PropertyQuickView({ property: initialProperty, onClose }: { prop
       <div className="p-5 sm:p-6">
         <div className="mb-3 flex flex-wrap gap-2"><CategoryBadge category={property.category} propertyType={property.propertyType} /><StatusBadge status={property.status} /></div>
         <h2 id="quick-view-title" dir="auto" className="mb-3 font-display text-2xl text-ink-800">{property.title}</h2>
-        <PriceDisplay price={property.price} listingType={property.listingType} rentalPeriod={property.rentalPeriod} />
+        <div className="flex items-center justify-between gap-3"><PriceDisplay price={property.price} listingType={property.listingType} rentalPeriod={property.rentalPeriod} />{editButton("price")}</div>
         <p className="my-4 flex items-center gap-2 text-sm text-ink-500"><Icon name="location" className="h-4 w-4" />{formatLocation(property.location, t)}</p>
         <div className="mb-5 flex flex-wrap gap-3 text-sm text-ink-600">
           {property.category !== "land" && property.details?.rooms != null && <span>{property.details.rooms} {t("property.rooms")}</span>}

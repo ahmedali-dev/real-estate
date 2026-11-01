@@ -16,14 +16,14 @@ function isValidId(id: string) {
 }
 
 // GET /api/properties/:id
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    if (!isValidId(params.id)) {
+    if (!isValidId((await params).id)) {
       return NextResponse.json({ error: "Invalid listing id." }, { status: 400 });
     }
     await connectToDatabase();
 
-    const doc = await Property.findById(params.id);
+    const doc = await Property.findById((await params).id);
     if (!doc) {
       return NextResponse.json({ error: "Listing not found." }, { status: 404 });
     }
@@ -39,18 +39,18 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 
     return NextResponse.json({ data: serializeProperty(doc, Boolean(session?.user)) }, { status: 200 });
   } catch (err) {
-    console.error(`GET /api/properties/${params.id} failed:`, err);
+    console.error(`GET /api/properties/${(await params).id} failed:`, err);
     return NextResponse.json({ error: "Failed to load listing." }, { status: 500 });
   }
 }
 
 // PUT /api/properties/:id
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { session, response: authError } = await requireListingsAccess();
   if (authError) return authError;
 
   try {
-    if (!isValidId(params.id)) {
+    if (!isValidId((await params).id)) {
       return NextResponse.json({ error: "Invalid listing id." }, { status: 400 });
     }
     await connectToDatabase();
@@ -74,7 +74,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
           { status: 403 }
         );
       }
-      const existing = await Property.findById(params.id).select("category");
+      const existing = await Property.findById((await params).id).select("category");
       if (existing && existing.category !== "build") {
         return NextResponse.json(
           { error: "Project managers can only manage build listings." },
@@ -127,7 +127,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const updated = await Property.findByIdAndUpdate(
-      params.id,
+      (await params).id,
       { $set: set, $unset: unset },
       { new: true, runValidators: true, context: "query" }
     );
@@ -138,7 +138,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json({ data: serializeProperty(updated, true) }, { status: 200 });
   } catch (err) {
-    console.error(`PUT /api/properties/${params.id} failed:`, err);
+    console.error(`PUT /api/properties/${(await params).id} failed:`, err);
     const message = err instanceof Error ? err.message : "Failed to update listing.";
     if (
       (err instanceof Error && err.name === "ValidationError") ||
@@ -151,41 +151,41 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 // DELETE /api/properties/:id
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { response: authError } = await requireAdmin();
   if (authError) return authError;
 
   try {
-    if (!isValidId(params.id)) {
+    if (!isValidId((await params).id)) {
       return NextResponse.json({ error: "Invalid listing id." }, { status: 400 });
     }
     await connectToDatabase();
 
-    const deleted = await Property.findByIdAndDelete(params.id);
+    const deleted = await Property.findByIdAndDelete((await params).id);
     if (!deleted) {
       return NextResponse.json({ error: "Listing not found." }, { status: 404 });
     }
 
-    return NextResponse.json({ data: { _id: params.id } }, { status: 200 });
+    return NextResponse.json({ data: { _id: (await params).id } }, { status: 200 });
   } catch (err) {
-    console.error(`DELETE /api/properties/${params.id} failed:`, err);
+    console.error(`DELETE /api/properties/${(await params).id} failed:`, err);
     return NextResponse.json({ error: "Failed to delete listing." }, { status: 500 });
   }
 }
 
 // Targeted quick edits preserve all unrelated listing fields.
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { session, response } = await requireListingsAccess();
   if (response) return response;
   if (req.headers.get("origin") !== req.nextUrl.origin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (!isValidId(params.id)) return NextResponse.json({ error: "Invalid listing id." }, { status: 400 });
+  if (!isValidId((await params).id)) return NextResponse.json({ error: "Invalid listing id." }, { status: 400 });
   try {
     const json = await req.json();
     // Reuse the field validators without requiring a complete listing payload.
     const parsed = (await import("@/lib/validations/quick-property")).quickPropertySchema.safeParse(json);
     if (!parsed.success) return NextResponse.json({ error: "Validation failed.", fieldErrors: flattenZodErrors(parsed.error) }, { status: 400 });
     await connectToDatabase();
-    const doc = await Property.findById(params.id);
+    const doc = await Property.findById((await params).id);
     if (!doc) return NextResponse.json({ error: "Listing not found." }, { status: 404 });
     if (isBuildOnlyRole(session!.user.role) && doc.category !== "build") return NextResponse.json({ error: "Project managers can only manage build listings." }, { status: 403 });
     const data = parsed.data;
@@ -197,7 +197,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (data.description !== undefined) set.description = data.description;
     if ("tiktokUrl" in data) { if (data.tiktokUrl) set.tiktokUrl = data.tiktokUrl; else unset.tiktokUrl = ""; }
     if ("mapUrl" in data) { if (data.mapUrl) set["location.mapUrl"] = data.mapUrl; else unset["location.mapUrl"] = ""; }
-    const updated = await Property.findOneAndUpdate({ _id: params.id, listingType: doc.listingType, category: doc.category }, { $set: set, $unset: unset }, { new: true, runValidators: true });
+    const updated = await Property.findOneAndUpdate({ _id: (await params).id, listingType: doc.listingType, category: doc.category }, { $set: set, $unset: unset }, { new: true, runValidators: true });
     if (!updated) return NextResponse.json({ error: "Listing changed. Refresh and try again." }, { status: 409 });
     return NextResponse.json({ data: serializeProperty(updated, true) });
   } catch { return NextResponse.json({ error: "Failed to update listing." }, { status: 500 }); }

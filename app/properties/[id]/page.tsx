@@ -61,10 +61,10 @@ const getVisibleProperty = cache(async (id: string): Promise<PropertyDTO | null>
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   try {
-    const property = await getVisibleProperty(params.id);
+    const property = await getVisibleProperty((await params).id);
     if (!property || property.visibility === "private") return FALLBACK_METADATA;
 
     const description =
@@ -97,8 +97,8 @@ export async function generateMetadata({
   }
 }
 
-export default async function PropertyDetailsPage({ params }: { params: { id: string } }) {
-  const property = await getVisibleProperty(params.id);
+export default async function PropertyDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const property = await getVisibleProperty((await params).id);
   if (!property) notFound();
 
   // Structured data (schema.org) for search engines — omitted entirely for
@@ -141,7 +141,6 @@ export default async function PropertyDetailsPage({ params }: { params: { id: st
       {jsonLd && (
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
         />
       )}

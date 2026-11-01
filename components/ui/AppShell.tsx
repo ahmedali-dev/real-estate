@@ -8,6 +8,8 @@ import { usePathname } from "next/navigation";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { SidebarNav } from "./Sidebar";
 import { OFFICE_PHONE_NUMBERS, officeWhatsAppLink, officeCallLink } from "@/lib/config/office";
+import { InstallApp } from "./InstallApp";
+import { MobileDock } from "./MobileDock";
 import { SiteHeader } from "./SiteHeader";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -69,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [pathname, staff]);
 
   return (
-    <div className={`estate-shell flex min-h-screen ${staff ? "estate-workspace" : "estate-public"}`}>
+    <div className={`estate-shell liquid-theme estate-with-dock flex min-h-screen ${staff ? "estate-workspace" : "estate-public"}`}>
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-white focus:p-3">{t("nav.skipContent")}</a>
       {staff && <aside className={`estate-sidebar hidden flex-shrink-0 border-e lg:block ${railCollapsed ? "is-collapsed" : ""}`} onPointerEnter={event => { if (event.pointerType === "mouse") setSidebarHovered(true); }} onPointerLeave={() => setSidebarHovered(false)} onFocusCapture={() => setSidebarFocused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setSidebarFocused(false); }}>
         <div className="sticky top-0 flex h-screen flex-col">
@@ -106,6 +108,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div> : status === "loading" ? <div className="h-16" aria-hidden="true" /> : <SiteHeader onMenuClick={() => setMobileOpen(true)} /> }
         <main id="main-content" tabIndex={-1} className={`min-h-[calc(100vh-64px)] flex-1 ${/^\/properties\/[^/]+\/?$/.test(pathname) ? "editorial-page-background" : ["/", "/apartments", "/builds", "/lands"].includes(pathname) ? "courtyard-page-background" : ""}`}>{children}</main>
         {!staff && <footer id="office-contact" className="estate-footer"><div><span className="estate-eyebrow">41 REAL ESTATE</span><h2>{locale === "ar" ? "عقارك القادم يبدأ بمحادثة." : "Your next place starts with a conversation."}</h2><p>{locale === "ar" ? "تواصل مع مكتبنا للمساعدة في البيع والإيجار وإدارة الأملاك." : "Talk to our office about buying, renting, and property management."}</p></div><div className="flex flex-wrap gap-3"><a className="btn-primary" href={officeWhatsAppLink(OFFICE_PHONE_NUMBERS[0])} target="_blank" rel="noopener noreferrer">{locale === "ar" ? "تواصل عبر واتساب" : "Chat on WhatsApp"}</a><a className="btn-secondary" href={officeCallLink(OFFICE_PHONE_NUMBERS[0])}>{locale === "ar" ? "اتصل بالمكتب" : "Call the office"}</a></div></footer>}
+        <InstallApp />
+        <MobileDock />
       </div>
     </div>
   );

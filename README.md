@@ -13,7 +13,7 @@
   </p>
 
   <p>
-    <img alt="Next.js 14" src="https://img.shields.io/badge/Next.js-14-3f5147?style=flat-square&amp;logo=nextdotjs&amp;logoColor=white" />
+    <img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16-3f5147?style=flat-square&amp;logo=nextdotjs&amp;logoColor=white" />
     <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-526d59?style=flat-square&amp;logo=typescript&amp;logoColor=white" />
     <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-647c69?style=flat-square&amp;logo=mongodb&amp;logoColor=white" />
     <img alt="Arabic and English" src="https://img.shields.io/badge/Language-AR%20%7C%20EN-7b8975?style=flat-square" />
@@ -344,3 +344,13 @@ See [deployment instructions](DEPLOYMENT.md) and [OpenWA service documentation](
   <p><strong>41 Real Estate</strong> · Arabic &amp; English</p>
   <a href="#41-real-estate">Back to top ↑</a>
 </div>
+
+### Runtime and framework
+
+The app uses Next.js 16.4.3 and React 19. Node.js 20.9 or newer is required; `.nvmrc` selects the existing Node 20.20.2 installation for local development. Run `nvm use` (or select that version in your shell), then `npm install` and `npm run dev` without `sudo`. Run `npm run lint` for ESLint and `npm run build` for the production build. Dashboard authentication is handled by `proxy.ts`.
+
+### Install on a phone or computer
+
+The website includes a web app manifest, 192/512 px icons, an Apple touch icon, and an **Install app** button. Deploy over HTTPS (localhost is supported for development); accessing a development server through a plain HTTP LAN address does not enable installation. Use Chrome/Edge's installation prompt on Android or desktop. On iPhone/iPad, use Safari → Share → Add to Home Screen. On supported macOS Safari versions, use File → Add to Dock. The button displays platform instructions when a native prompt is unavailable and disappears in standalone mode.
+
+A production-only service worker serves a generic offline page when navigation fails. It never stores API responses, property details, or authenticated pages. Current property data and staff actions still require an internet connection. Validate native installation on real devices after deployment; development mode intentionally does not register the worker.

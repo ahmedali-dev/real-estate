@@ -12,21 +12,21 @@ import { sendPropertyOpenwa, OpenwaSendError } from "@/lib/openwa";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { session, response } = await requireListingsAccess();
   if (response) return response;
   if (req.headers.get("origin") !== req.nextUrl.origin) return NextResponse.json({ error: "Forbidden", code: "sendFailed" }, { status: 403 });
   const config = await resolvedWhatsAppConfig();
   const origin = config && "siteUrl" in config ? config.siteUrl : configuredPublicSiteOrigin();
   if (!config || !origin) return NextResponse.json({ code: "openwaSetup" }, { status: 503 });
-  if (!mongoose.Types.ObjectId.isValid(params.id)) return NextResponse.json({ code: "sendFailed" }, { status: 400 });
+  if (!mongoose.Types.ObjectId.isValid((await params).id)) return NextResponse.json({ code: "sendFailed" }, { status: 400 });
   let body;
   try { body = await req.json(); } catch { return NextResponse.json({ code: "invalidRecipient" }, { status: 400 }); }
   const to = typeof body?.phone === "string" ? whatsappRecipient(body.phone) : null;
   if (!to || !["en", "ar"].includes(body?.locale)) return NextResponse.json({ code: "invalidRecipient" }, { status: 400 });
   try {
     await connectToDatabase();
-    const doc = await Property.findById(params.id);
+    const doc = await Property.findById((await params).id);
     if (!doc) return NextResponse.json({ code: "sendFailed" }, { status: 404 });
     if (isBuildOnlyRole(session!.user.role) && doc.category !== "build") return NextResponse.json({ code: "sendFailed" }, { status: 403 });
     if (doc.visibility === "private") return NextResponse.json({ code: "privateShare" }, { status: 400 });
