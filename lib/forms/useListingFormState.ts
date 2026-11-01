@@ -297,8 +297,11 @@ export function useListingFormState(category: Category, property?: PropertyDTO) 
     };
   }, [form, category, isLand, isBuild]);
 
+  const submissionPending = useRef(false);
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submissionPending.current) return;
+    submissionPending.current = true;
     setSubmitError(null);
     setErrors({});
     setSubmitting(true);
@@ -316,6 +319,7 @@ export function useListingFormState(category: Category, property?: PropertyDTO) 
         setSubmitError(t("form.genericError"));
       }
     } finally {
+      submissionPending.current = false;
       setSubmitting(false);
     }
   }

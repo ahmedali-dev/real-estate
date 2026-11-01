@@ -1,5 +1,6 @@
 "use client";
 
+import { OfferFields } from "@/components/forms/fields/OfferFields";
 import { EditorialListingForm } from "@/components/forms/EditorialListingForm";
 import type { PropertyDTO } from "@/types/property";
 import { useListingFormState } from "@/lib/forms/useListingFormState";
@@ -44,6 +45,8 @@ export function BuildForm({ property }: { property?: PropertyDTO }) {
           <input
             id="title"
             className="input-field"
+            minLength={3}
+            maxLength={160}
             value={form.title}
             onChange={(e) => update("title", e.target.value)}
             placeholder={t("form.titlePlaceholderBuild")}
@@ -51,6 +54,8 @@ export function BuildForm({ property }: { property?: PropertyDTO }) {
           />
           {errors.title && <p className="field-error">{errors.title}</p>}
         </div>
+
+        <OfferFields form={form} update={update} errors={errors} existingUser={property?.broughtBy} showPropertyType={false} />
 
         <ListingTypeField form={form} update={update} t={t} />
 
@@ -69,6 +74,8 @@ export function BuildForm({ property }: { property?: PropertyDTO }) {
           <textarea
             id="description"
             className="input-field min-h-[120px]"
+            minLength={10}
+            maxLength={5000}
             value={form.description}
             onChange={(e) => update("description", e.target.value)}
             placeholder={t("form.descriptionPlaceholderBuild")}

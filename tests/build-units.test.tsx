@@ -15,7 +15,7 @@ test("building apartments have one number field and no name or suitability field
   assert.ok(html.includes('id="unit-number-0"'));
   assert.ok(!html.includes('id="unit-name-0"'));
   assert.ok(!html.includes('unit-residency-0'));
-  assert.ok(html.includes("This apartment is rented"));
+  assert.ok(html.includes("هذه الشقة مؤجرة"));
   assert.ok(!html.includes('id="unit-tenant-name-0"'));
 });
 

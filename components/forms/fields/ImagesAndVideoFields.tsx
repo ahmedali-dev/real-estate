@@ -85,7 +85,7 @@ export function ImagesAndVideoFields({
 
   return (
     <>
-      <section>
+      <section aria-busy={coverStatus === "loading"}>
         <h3 className="flex flex-wrap items-center gap-2 font-display text-base font-semibold text-ink-800"><Icon name="video" className="h-5 w-5 text-moss-500" />{t("form.videoSection")}</h3>
         <p className="mt-1 text-sm text-ink-400">{t("form.videoHint")}</p>
         <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -127,31 +127,29 @@ export function ImagesAndVideoFields({
         <div
           role="group"
           tabIndex={0}
-          aria-label={t("form.pasteImage")}
+          aria-label={t("form.imageUploadArea")}
           aria-busy={uploading}
-          className="mt-3 rounded-xl border-2 border-dashed border-ink-200 bg-stone-50 p-5 text-center outline-none focus-visible:border-moss-500 focus-visible:ring-2 focus-visible:ring-moss-200"
+          className="mt-3 rounded-2xl border-2 border-dashed border-ink-200 bg-stone-50 px-5 py-7 text-center outline-none transition focus-within:border-brass-500 focus-within:ring-2 focus-within:ring-brass-100 hover:border-ink-300"
         >
-          <Icon name="image" className="mx-auto mb-2 h-6 w-6 text-moss-500" />
-          <p className="text-sm font-semibold text-ink-700">{t("form.pasteImage")}</p>
-          <p className="mt-1 text-xs text-ink-400">{t("form.pasteImageHint")}</p>
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <Icon name="image" className="mx-auto mb-3 h-8 w-8 text-brass-600" />
+          <p className="text-sm font-semibold text-ink-700">{t("form.imageUploadArea")}</p>
+          <p className="mx-auto mt-2 max-w-sm text-xs leading-6 text-ink-400">{t("form.imageUploadHint")}</p>
           <input
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
             onChange={handleFileSelected}
+            aria-label={t("form.uploadFromDevice")}
             className="hidden"
           />
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="btn-secondary whitespace-nowrap"
+            className="btn-secondary mt-4 whitespace-nowrap"
           >
             {uploading ? t("form.uploading") : t("form.uploadFromDevice")}
           </button>
-          <span className="text-xs text-ink-400">{t("form.orPasteUrl")}</span>
         </div>
         {localPreview && <div className="mt-3 overflow-hidden rounded-xl border border-ink-100 bg-stone-50">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -160,7 +158,8 @@ export function ImagesAndVideoFields({
         </div>}
         {uploadError && <p role="alert" className="field-error mt-2">{uploadError}</p>}
 
-        <div className="mt-3 flex gap-2">
+        <p className="mt-4 text-xs text-ink-400">{t("form.orPasteUrl")}</p>
+        <div className="mt-2 flex gap-2">
           <input
             className="input-field"
             placeholder={t("form.imageUrlPlaceholder")}

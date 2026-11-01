@@ -32,13 +32,13 @@ function getFromPath(obj: unknown, path: string): unknown {
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
+  const [locale, setLocaleState] = useState<Locale>("ar");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "ar" || stored === "en") {
-      setLocaleState(stored);
-    }
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (stored === "ar" || stored === "en") setLocaleState(stored);
+    } catch { /* Use Arabic if browser storage is unavailable. */ }
   }, []);
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
-    window.localStorage.setItem(STORAGE_KEY, next);
+    try { window.localStorage.setItem(STORAGE_KEY, next); } catch {}
   }, []);
 
   const t = useCallback(

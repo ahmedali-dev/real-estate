@@ -42,6 +42,8 @@ export function LandForm({ property }: { property?: PropertyDTO }) {
           <input
             id="title"
             className="input-field"
+            minLength={3}
+            maxLength={160}
             value={form.title}
             onChange={(e) => update("title", e.target.value)}
             placeholder={t("form.titlePlaceholderLand")}
@@ -69,6 +71,8 @@ export function LandForm({ property }: { property?: PropertyDTO }) {
           <textarea
             id="description"
             className="input-field min-h-[120px]"
+            minLength={10}
+            maxLength={5000}
             value={form.description}
             onChange={(e) => update("description", e.target.value)}
             placeholder={t("form.descriptionPlaceholderLand")}

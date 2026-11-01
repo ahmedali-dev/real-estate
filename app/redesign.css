@@ -400,3 +400,81 @@ button, a, summary, input, select, textarea { -webkit-tap-highlight-color: trans
 .estate-install-dialog::backdrop { background:#0f141980; }
 @media(max-width:1023px){.estate-install-button{bottom:calc(92px + env(safe-area-inset-bottom,0px));inset-inline-end:16px;padding:9px 14px;}}
 @media(display-mode:standalone){.estate-install-button{display:none}}
+
+/* Compact installation control; its accessible name remains available. */
+.estate-install-button { width:48px; height:48px; min-height:48px; padding:0; justify-content:center; border-radius:50%; }
+@media(max-width:1023px){.estate-install-button{width:44px;height:44px;min-height:44px;padding:0;}}
+
+/* Listing actions stay above mobile navigation; install control stays in page flow. */
+.estate-with-dock:has(.listing-form) .estate-install-button { position:static; align-self:flex-end; margin:12px 24px 24px; }
+@media(max-width:1023px) {
+  .estate-with-dock .editorial-listing .guided-actions { bottom:calc(90px + env(safe-area-inset-bottom,0px)); z-index:10; }
+  .estate-with-dock .listing-form { min-width:0; }
+  .estate-with-dock .guided-actions { flex-wrap:wrap; }
+}
+
+/* Listing composer: clear cards, quick section links and a quiet preview. */
+.estate-shell .composer-form { grid-template-columns:minmax(0,1fr) 272px; gap:24px; max-width:1180px; margin-inline:auto; align-items:start; }
+.composer-navigation { grid-column:1/-1; display:flex; gap:8px; padding:6px; background:#edf4f9; border:1px solid #dbe8f1; border-radius:16px; overflow-x:auto; }
+.composer-navigation a { display:flex; flex:1; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:8px 12px; color:#536471; font-size:12px; font-weight:600; border-radius:11px; white-space:nowrap; }
+.composer-navigation a:hover,.composer-navigation a:focus-visible { color:#167ac6; background:white; }
+.composer-navigation a>span { display:grid; place-items:center; width:23px; height:23px; border-radius:50%; background:white; color:#167ac6; font-size:11px; }
+.composer-form .guided-main { min-width:0; }
+.estate-shell .composer-form .guided-panel { background:white; border:1px solid #dce7ef; border-radius:20px; box-shadow:0 3px 16px #0f141904; padding:0; margin-bottom:20px; overflow:visible; scroll-margin-top:110px; }
+.estate-shell .composer-form .guided-panel>header { display:flex; align-items:center; gap:14px; padding:22px 26px; margin:0; border-bottom:1px solid #eff3f4; }
+.composer-section-icon { display:grid; place-items:center; width:44px; height:44px; flex-shrink:0; border:1px solid #d5ebfa; border-radius:13px; background:#edf8ff; color:#167ac6; }
+.composer-section-number { display:block; color:#788c9a; font-size:10px; font-weight:600; letter-spacing:.07em; margin-bottom:4px; }
+.estate-shell .composer-form .guided-panel>header h2 { color:#0f1419; font-family:var(--font-body); font-size:18px; line-height:1.5; font-weight:700; }
+.estate-shell .composer-form .guided-panel>header .composer-section-hint { color:#536471; font-size:12px; margin-top:3px; line-height:1.7; }
+.composer-section-content { padding:26px; }
+.estate-shell .composer-form .input-field { border:1px solid #cfd9de; border-radius:11px; background:#fff; font-size:14px; }
+.estate-shell .composer-form .input-field:focus { border-color:#1d9bf0; box-shadow:0 0 0 3px #1d9bf015; }
+.composer-form textarea.input-field { min-height:150px; line-height:1.8; resize:vertical; }
+.composer-form .label-field { margin-bottom:8px; font-size:12px; color:#334654; }
+.estate-shell .composer-form .guided-summary { top:24px; padding:22px; border:1px solid #dce7ef; border-radius:20px; background:linear-gradient(155deg,#fff,#f2f8fc); box-shadow:none; }
+.composer-form .guided-summary-label { font-size:11px; color:#536471; letter-spacing:.05em; margin-bottom:18px; }
+.composer-form .guided-illustration { display:grid; place-items:center; height:128px; border-radius:14px; background:linear-gradient(135deg,#e8f5fe,#f7fbfe); color:#1684d1; }
+.composer-form .guided-summary h3 { font-family:var(--font-body); color:#0f1419; font-size:17px; line-height:1.7; }
+.composer-form .guided-summary hr { margin:20px 0; border-color:#dce7ef; }
+.composer-price-label { display:block; margin-bottom:6px; color:#536471; font-size:11px; }
+.composer-form .guided-summary>strong { display:block; color:#167ac6; font-size:20px; line-height:1.6; }
+.composer-form .guided-summary dl { border-top:1px solid #dce7ef; padding-top:8px; margin-top:20px; font-size:12px; }
+.composer-form .guided-summary dl div { margin-top:14px; }
+.estate-shell .composer-form .guided-actions { position:sticky; bottom:16px; display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-top:0; padding:14px 16px; border:1px solid #dce7ef; border-radius:16px; background:#fffffff5; box-shadow:0 4px 24px #0f141908; }
+.composer-save-note { display:flex; align-items:center; gap:6px; margin-inline-end:auto; color:#536471; font-size:11px; }
+.composer-form .guided-actions button { border-radius:12px; min-height:46px; }
+@media(max-width:1100px) {
+  .estate-shell .composer-form { grid-template-columns:minmax(0,1fr); gap:18px; }
+  .estate-shell .composer-form .guided-summary { display:none; }
+}
+@media(max-width:1023px) {
+  .estate-with-dock .composer-form .guided-actions { bottom:calc(90px + env(safe-area-inset-bottom,0px)); }
+}
+@media(max-width:640px) {
+  .composer-navigation { gap:4px; border-radius:13px; }
+  .composer-navigation a { flex:none; padding:8px 10px; font-size:11px; }
+  .composer-navigation a>svg { display:none; }
+  .estate-shell .composer-form .guided-panel { border-radius:16px; margin-bottom:16px; }
+  .estate-shell .composer-form .guided-panel>header { padding:18px; gap:12px; }
+  .estate-shell .composer-form .guided-panel>header h2 { font-size:17px; }
+  .composer-section-content { padding:18px; }
+  .composer-section-icon { width:38px; height:38px; border-radius:11px; }
+  .composer-save-note { display:none; }
+  .composer-form .guided-actions button { flex:1; padding-inline:12px; }
+}
+
+/* Consistent field rhythm, including nested groups inside shared form sections. */
+.composer-form .composer-section-content { padding:22px; }
+.composer-form .composer-section-content > div { display:flex; flex-direction:column; gap:24px; }
+.composer-form .composer-section-content .grid.gap-5 { column-gap:20px; row-gap:16px; align-items:start; }
+.composer-form .composer-section-content .grid.gap-4 { gap:16px; align-items:start; }
+.composer-form .label-field { margin-bottom:6px; line-height:1.6; }
+.composer-form .field-error { margin-top:6px; line-height:1.5; }
+.estate-shell .composer-form .guided-panel > header { padding:20px 22px; }
+@media(max-width:640px) {
+  .composer-form .composer-section-content { padding:16px; }
+  .composer-form .composer-section-content > div { gap:20px; }
+  .composer-form .composer-section-content .grid.gap-5 { gap:14px; }
+  .composer-form .composer-section-content .grid.gap-4 { gap:14px; }
+  .estate-shell .composer-form .guided-panel > header { padding:16px; }
+}
