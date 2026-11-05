@@ -1,4 +1,5 @@
 "use client";
+import { OwnerFields,type OwnerFormState } from "@/components/forms/fields/OwnerFields";
 import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { useEffect, useRef, useState } from "react";
 import { LocationMap } from "./LocationMap";
@@ -6,16 +7,17 @@ import { isGoogleMapsUrl } from "@/lib/maps";
 import type { PropertyDTO } from "@/types/property";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
-export type QuickEditField = "price" | "status" | "tiktokUrl" | "mapUrl" | "description";
+export type QuickEditField = "price" | "status" | "tiktokUrl" | "mapUrl" | "description" | "owner";
 
 export function PropertyQuickEdit({ property, field, onClose, onSaved }: { property: PropertyDTO; field: QuickEditField; onClose: () => void; onSaved: (property: PropertyDTO) => void }) {
-  const { locale } = useLanguage();
+  const { locale,t } = useLanguage();
   const ar = locale === "ar";
-  const labels = { description: ar ? "تعديل الوصف" : "Edit description", price: ar ? "تعديل السعر" : "Edit price", status: ar ? "تعديل حالة العقار" : "Edit availability", tiktokUrl: ar ? "تعديل رابط TikTok" : "Edit TikTok link", mapUrl: ar ? "تعديل الموقع" : "Edit location" };
+  const labels = { owner:ar?"تعديل بيانات المالك":"Edit owner information", description: ar ? "تعديل الوصف" : "Edit description", price: ar ? "تعديل السعر" : "Edit price", status: ar ? "تعديل حالة العقار" : "Edit availability", tiktokUrl: ar ? "تعديل رابط TikTok" : "Edit TikTok link", mapUrl: ar ? "تعديل الموقع" : "Edit location" };
   const dialog = useRef<HTMLDialogElement>(null);
   const saving = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [owner,setOwner]=useState<OwnerFormState>({hasOwner:Boolean(property.owner),ownerName:property.owner?.name||"",ownerPhone:property.owner?.phone||"",ownerEmail:property.owner?.email||"",ownerNotes:property.owner?.notes||""});
   const [description, setDescription] = useState(property.description);
   const [price, setPrice] = useState(property.price?.toString() || "");
   const [status, setStatus] = useState(property.status);
@@ -31,6 +33,7 @@ export function PropertyQuickEdit({ property, field, onClose, onSaved }: { prope
     event.preventDefault(); if (saving.current) return;
     saving.current = true; setBusy(true); setError("");
     const changes: Record<string, unknown> = {};
+    if(field==="owner")changes.owner=owner.hasOwner?{name:owner.ownerName,phone:owner.ownerPhone,email:owner.ownerEmail,notes:owner.ownerNotes}:null;
     if (field === "description" && description !== property.description) changes.description = description;
     if (field === "price" && price !== (property.price?.toString() || "")) changes.price = price.trim() ? Number(price) : null;
     if (field === "status" && status !== property.status) changes.status = status;
@@ -50,6 +53,7 @@ export function PropertyQuickEdit({ property, field, onClose, onSaved }: { prope
     <p className="mt-2 border-b border-ink-100 pb-5 text-sm text-ink-500">{property.title}</p>
     <form onSubmit={save} className="mt-5 space-y-4">
       <fieldset disabled={busy} className="space-y-4">
+        {field==="owner"&&<><OwnerFields form={owner} update={(key,value)=>setOwner(old=>({...old,[key]:value}))} errors={{}} t={t} /><p className="text-xs leading-6 text-ink-500">{ar?"يُعدّل هذا جهة اتصال المالك في الإعلان فقط. تبقى اتفاقيات الإدارة المحفوظة مستقلة.":"This updates the listing’s owner contact only. Saved management agreements remain separate."}</p></>}
         {field === "description" && <label className="block text-sm">{ar ? "الوصف" : "Description"}<textarea autoFocus dir="auto" required minLength={10} maxLength={5000} value={description} onChange={event => setDescription(event.target.value)} className="input-field mt-2 min-h-[180px]" /></label>}
         {field === "price" && <label className="block text-sm">{ar ? "السعر (ر.س) — اختياري" : "Price (SAR) — optional"}<input autoFocus type="number" min="0.01" step="any" value={price} onChange={e => setPrice(e.target.value)} className="input-field mt-2" /></label>}
         {field === "status" && <label className="block text-sm">{ar ? "حالة العقار" : "Availability"}<SelectDropdown autoFocus value={status} onChange={e => setStatus(e.target.value as PropertyDTO["status"])} className="input-field mt-2"><option value="available">{ar ? "متاح" : "Available"}</option>{property.listingType === "rent" ? <option value="rented">{ar ? "مؤجر" : "Rented"}</option> : <option value="sold">{ar ? "مباع" : "Sold"}</option>}</SelectDropdown></label>}

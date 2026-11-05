@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { isGoogleMapsUrl } from "@/lib/maps";
 
-const ownerSchema = z.object({
+export const ownerSchema = z.object({
   name: z.string().trim().min(2, "Owner name is required."),
   phone: z.string().trim().min(5, "A valid phone number is required."),
   email: z.string().trim().email("Enter a valid email address.").optional().or(z.literal("")),

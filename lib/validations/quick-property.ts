@@ -1,7 +1,9 @@
 import { z } from "zod";
+import { ownerSchema } from "./property";
 import { isGoogleMapsUrl } from "@/lib/maps";
 
 export const quickPropertySchema = z.object({
+  owner:ownerSchema.strict().nullable().optional(),
   description: z.string().trim().min(10, "Description must be at least 10 characters.").max(5000).optional(),
   price: z.number().positive().finite().nullable().optional(),
   status: z.enum(["available", "sold", "rented"]).optional(),

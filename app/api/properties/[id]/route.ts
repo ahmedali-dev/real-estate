@@ -82,6 +82,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         );
       }
     }
+    const { ManagementRecord: LinkedManagementRecord } = await import("@/models/ManagementRecord");
+    const protectedProperty = await Property.findById((await params).id).select("category managementRegistered");
+    if (protectedProperty?.managementRegistered) {
+      if (protectedProperty.category !== data.category) return NextResponse.json({ error: "Managed properties cannot change category while records exist." }, { status: 409 });
+      const numbers = (data.units ?? []).map(unit => unit.number).filter(Boolean);
+      const linkedUnit = await LinkedManagementRecord.exists({ propertyId: (await params).id, archived: false, "data.unit": { $nin: ["", ...numbers] } });
+      if (linkedUnit) return NextResponse.json({ error: "A unit is linked to management records. Retain its number or archive those records first." }, { status: 409 });
+    }
     const selectedUser = data.broughtByUserId ? await User.findById(data.broughtByUserId).select("name active") : null;
     if (data.broughtByUserId && !selectedUser) {
       return NextResponse.json({ error: "Choose an existing system user.", fieldErrors: { broughtByUserId: "User no longer exists." } }, { status: 400 });
@@ -161,7 +169,9 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     }
     await connectToDatabase();
 
-    const deleted = await Property.findByIdAndDelete((await params).id);
+    const { ManagementRecord } = await import("@/models/ManagementRecord");
+    if (await ManagementRecord.exists({ propertyId: (await params).id })) return NextResponse.json({ error: "This property has management records. Retain it to preserve its financial history." }, { status: 409 });
+    const deleted = await Property.findOneAndDelete({ _id: (await params).id, managementRegistered: { $ne: true } });
     if (!deleted) {
       return NextResponse.json({ error: "Listing not found." }, { status: 404 });
     }
@@ -192,6 +202,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if ((data.status === "sold" && doc.listingType !== "sale") || (data.status === "rented" && doc.listingType !== "rent")) return NextResponse.json({ error: "Availability must match the listing type." }, { status: 400 });
     const set: Record<string, unknown> = {};
     const unset: Record<string, string> = {};
+    if ("owner" in data) { if(data.owner===null)unset.owner="";else set.owner=data.owner; }
     if ("price" in data) { if (data.price === null) unset.price = ""; else set.price = data.price; }
     if (data.status) set.status = data.status;
     if (data.description !== undefined) set.description = data.description;

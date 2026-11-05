@@ -111,7 +111,7 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
       details.residencyType != null);
   const units = property.units ?? [];
   const canQuickEdit = Boolean(session?.user && ["admin", "real_estate_officer", "project_manager"].includes(session.user.role) && (session.user.role !== "project_manager" || property.category === "build"));
-  const editLabel = (field: QuickEditField) => ({ description: locale === "ar" ? "تعديل الوصف" : "Edit description", price: locale === "ar" ? "تعديل السعر" : "Edit price", status: locale === "ar" ? "تعديل الحالة" : "Edit availability", tiktokUrl: locale === "ar" ? "تعديل رابط TikTok" : "Edit TikTok link", mapUrl: locale === "ar" ? "تعديل الموقع" : "Edit location" })[field];
+  const editLabel = (field: QuickEditField) => ({ owner:locale==="ar"?"تعديل بيانات المالك":"Edit owner information",description: locale === "ar" ? "تعديل الوصف" : "Edit description", price: locale === "ar" ? "تعديل السعر" : "Edit price", status: locale === "ar" ? "تعديل الحالة" : "Edit availability", tiktokUrl: locale === "ar" ? "تعديل رابط TikTok" : "Edit TikTok link", mapUrl: locale === "ar" ? "تعديل الموقع" : "Edit location" })[field];
   const canSendFromOffice = Boolean(session?.user && ["admin", "real_estate_officer", "project_manager"].includes(session.user.role) &&
     (session.user.role !== "project_manager" || property.category === "build") && property.visibility === "public");
 
@@ -221,7 +221,7 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
           <div className="mt-5 border-t border-ink-100 pt-5">
             {session?.user ? (
               <>
-                <div className="flex items-center justify-between gap-3"><p className="text-xs font-semibold uppercase tracking-wide text-ink-400">{t("property.ownerContact")}</p>{property.owner && <CopyButton label={t("property.copyOwner")} text={[property.owner.name, property.owner.phone, property.owner.email, property.owner.notes].filter(Boolean).join("\n")} />}</div>
+                <div className="flex items-center justify-between gap-3"><p className="text-xs font-semibold uppercase tracking-wide text-ink-400">{t("property.ownerContact")}</p><div className="flex items-center gap-2">{canQuickEdit&&<button type="button" className="property-icon-action" aria-label={editLabel("owner")} title={editLabel("owner")} onClick={()=>setQuickEditField("owner")}><Icon name="edit" className="h-4 w-4" /></button>}{property.owner && <CopyButton label={t("property.copyOwner")} text={[property.owner.name, property.owner.phone, property.owner.email, property.owner.notes].filter(Boolean).join("\n")} />}</div></div>
                 {property.owner ? (
                   <>
                     <p className="mt-2 font-medium text-ink-800">{property.owner.name}</p>

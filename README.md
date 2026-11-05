@@ -354,3 +354,19 @@ The app uses Next.js 16.4.3 and React 19. Node.js 20.9 or newer is required; `.n
 The website includes a web app manifest, 192/512 px icons, an Apple touch icon, and an **Install app** button. Deploy over HTTPS (localhost is supported for development); accessing a development server through a plain HTTP LAN address does not enable installation. Use Chrome/Edge's installation prompt on Android or desktop. On iPhone/iPad, use Safari → Share → Add to Home Screen. On supported macOS Safari versions, use File → Add to Dock. The button displays platform instructions when a native prompt is unavailable and disappears in standalone mode.
 
 A production-only service worker serves a generic offline page when navigation fails. It never stores API responses, property details, or authenticated pages. Current property data and staff actions still require an internet connection. Validate native installation on real devices after deployment; development mode intentionally does not register the worker.
+
+### Property management
+
+Open **Property Management / إدارة الأملاك** from the staff sidebar, then select an existing property or create one. Each property has a private workspace for management agreements, leases and calendar-based rent schedules, income, expenses, documents, and an audit history.
+
+Agreements explicitly select collected-rent, scheduled-rent, or fixed-fee terms. Financial records distinguish expected/unpaid amounts from actual receipts/payments and identify who bears each cost. Version checks and idempotency keys protect edits and financial entry retries. Documents are private; archived records retain their history.
+
+Stage 2 adds maintenance requests with budget approval, one-time lease installment generation, partial payments, overdue balances, payment reversals, and owner payout records with fee/cost deductions and saved balance snapshots. Payouts record transfers made outside the app; they do not initiate bank transfers.
+
+Stage 3 adds portfolio/property cash-flow reports, rent collection and debt ageing, maintenance budget comparisons, owner statements, expense breakdowns, and in-app follow-up reminders. Filter reports by period, property, category, agreement/owner and employee; export all matching rows as Excel-compatible Arabic/English CSV or a printable report for Save as PDF.
+
+See [the Stage 1–3 workflow, report definitions, API, and verification guide](docs/PROPERTY_MANAGEMENT.md). MongoDB Atlas or another replica-set database is required for transactions and consistent reporting snapshots. Automated bank collections, outbound notifications and immutable accounting period closes are not included.
+
+### Reuse saved owners
+
+In apartment, building and land forms, enable **I have owner information**, then choose a saved owner from the searchable dropdown or use **Add new owner**. Saved choices come from existing listings, deduplicated by name and formatted phone number; saving a new listing makes its owner available for reuse. Selecting an owner copies their contact details into the listing and does not update other listings. The lookup is staff-only; project managers can reuse owners from buildings only.

@@ -53,7 +53,8 @@ function isActive(pathname: string, href: string) {
       (pathname.startsWith("/dashboard/") &&
         !pathname.startsWith("/dashboard/orders") &&
         !pathname.startsWith("/dashboard/users") &&
-        !pathname.startsWith("/dashboard/whatsapp"))
+        !pathname.startsWith("/dashboard/whatsapp") &&
+        !pathname.startsWith("/dashboard/management"))
     );
   }
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -114,6 +115,7 @@ export function SidebarNav({ onNavigate, collapsed = false }: { onNavigate?: () 
   const adminItems: NavItem[] = [];
   if (role && LISTINGS_ROLES.includes(role)) {
     adminItems.push({ href: "/dashboard", labelKey: "nav.dashboard", mark: "grid" });
+    adminItems.push({ href: "/dashboard/management", labelKey: "nav.management", mark: "key" });
   }
   if (role && ORDERS_ROLES.includes(role)) {
     adminItems.push({ href: "/dashboard/orders", labelKey: "nav.orders", mark: "clipboard" });

@@ -309,7 +309,8 @@ export function useListingFormState(category: Category, property?: PropertyDTO) 
       const result = isEdit
         ? await updateProperty(property!._id, payload)
         : await createProperty(payload);
-      router.push(`/properties/${result.data._id}`);
+      const managed = !isEdit && new URLSearchParams(window.location.search).get("manage") === "1";
+      router.push(managed ? `/dashboard/management/${result.data._id}` : `/properties/${result.data._id}`);
       router.refresh();
     } catch (err) {
       if (err instanceof ApiClientError) {

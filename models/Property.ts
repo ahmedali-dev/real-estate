@@ -1,3 +1,4 @@
+import type { ManagementDetails } from "@/lib/property-management";
 import mongoose, { Schema, type HydratedDocument, Model } from "mongoose";
 import type { Category, ListingType, RentalPeriod, ListingStatus, Visibility, ResidencyType } from "@/types/property";
 
@@ -33,6 +34,9 @@ export interface PropertyDocument {
   title: string;
   category: Category;
   propertyType?: "villa" | "apartment" | "duplex" | "floor" | "shop" | "other";
+  managementRevision?: number;
+  managementRegistered?: boolean;
+  management?: ManagementDetails;
   broughtBy?: { userId: string; name: string };
 
   listingType: ListingType;
@@ -123,6 +127,13 @@ const PropertySchema = new Schema<PropertyDocument>(
   {
     title: { type: String, required: true, trim: true, maxlength: 160 },
     propertyType: { type: String, enum: ["villa", "apartment", "duplex", "floor", "shop", "other"] },
+    managementRevision: { type: Number, default: 0 },
+    managementRegistered: { type: Boolean, default: false },
+    management: { type: new Schema<ManagementDetails>({
+      commissionRate: { type: Number, required: true, min: 5, max: 15, validate: Number.isInteger },
+      transactionAmount: { type: Number, min: 0, max: 1_000_000_000_000 },
+      notes: { type: String, default: "", maxlength: 2000 },
+    }, { _id: false }), default: undefined },
     broughtBy: { userId: { type: String }, name: { type: String } },
     category: {
       type: String,
@@ -315,7 +326,7 @@ export type PropertyHydrated = HydratedDocument<PropertyDocument>;
 // Mongoose silently strips unknown fields from updates, so replace that stale
 // model rather than losing the selected offer source or property type.
 const cachedProperty = mongoose.models.Property as Model<PropertyDocument> | undefined;
-if (cachedProperty && (!cachedProperty.schema.path("broughtBy.userId") || !cachedProperty.schema.path("propertyType"))) {
+if (cachedProperty && (!cachedProperty.schema.path("broughtBy.userId") || !cachedProperty.schema.path("propertyType") || !cachedProperty.schema.path("management") || !cachedProperty.schema.path("managementRegistered") || !cachedProperty.schema.path("managementRevision"))) {
   mongoose.deleteModel("Property");
 }
 
