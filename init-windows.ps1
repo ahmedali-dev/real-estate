@@ -19,7 +19,7 @@ try {
     if (-not $Component) { $Component = Select-AppComponent 'first-time setup' }
     if (-not $Component) { return }
     Assert-WindowsRuntime $Component
-    if (-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)) { throw 'npm.cmd is missing. Reinstall Node.js with npm included.' }
+    [void](Resolve-ProjectNpm)
     $web = $Component -ne 'WhatsApp'
     $whatsapp = $Component -ne 'Web'
     if ($web) {

@@ -45,7 +45,7 @@ Or choose explicitly:
 .\init-windows.ps1 -Component Both -Start
 ```
 
-Setup runs `npm.cmd ci` independently for each selected component. The web installation includes build dependencies even if the server's environment is production. OpenWA/browser installation may take several minutes.
+Setup resolves `npm.exe` (used by some Windows version managers) or `npm.cmd` (the official installer shim), then runs `ci` independently for each selected component. It invokes the resolved native application directly, without requiring `npm.ps1` execution-policy changes. The web installation includes build dependencies even if the server's environment is production. OpenWA/browser installation may take several minutes.
 
 The setup prompts for the public website origin, a masked MongoDB URI, and an optional masked Cloudinary URL. Blank secret prompts keep existing values. For a fresh web setup the MongoDB URI is required. Encode special characters in URI usernames/passwords. Production origins use HTTPS; HTTP is accepted for loopback addresses only. Use just the origin, such as `https://www.41real-estate.site`, without a path.
 
@@ -170,3 +170,14 @@ node.exe --version
 ```
 
 The version check should print `v22.23.4`. If your version manager does not switch automatically, select/install that version with the manager you already use, then rerun setup. Do not install Node 20 to work around the stale pin: the WhatsApp service requires Node 22.x.
+
+### npm.exe works, but setup says npm.cmd is missing
+
+Some Windows Node version managers provide `npm.exe` instead of `npm.cmd`. npm is already installed in this case; reinstalling Node is unnecessary. Update both `init-windows.ps1` and `scripts\windows\common.ps1` from this repository. Setup now resolves `npm.exe` first and falls back to `npm.cmd`, including paths containing spaces and Arabic characters. Then run:
+
+```powershell
+npm.exe --version
+.\init-windows.ps1 -Component WhatsApp
+```
+
+The preflight and dependency installer use the same resolver, so an accepted npm executable is also the one used for dependency installation.

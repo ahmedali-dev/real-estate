@@ -42,11 +42,22 @@ function Read-PrivateValue {
     finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer) }
 }
 
+function Resolve-ProjectNpm {
+    # Version managers may provide npm.exe; the official installer usually provides npm.cmd.
+    # Resolve only native applications, avoiding npm.ps1 execution-policy differences.
+    foreach ($candidate in @('npm.exe', 'npm.cmd')) {
+        $application = Get-Command -Name $candidate -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($null -ne $application) { return $application.Path }
+    }
+    throw 'npm was not found (checked npm.exe and npm.cmd). Install/select Node.js with npm included, then reopen PowerShell.'
+}
+
 function Invoke-ProjectNpm {
     param([string]$Directory, [string[]]$NpmArguments)
     Push-Location -LiteralPath $Directory
     try {
-        & npm.cmd @NpmArguments
+        $npmExecutable = Resolve-ProjectNpm
+        & $npmExecutable @NpmArguments
         if ($LASTEXITCODE -ne 0) { throw ('npm failed in ' + $Directory + '. Resolve the error above and rerun setup.') }
     }
     finally { Pop-Location }
