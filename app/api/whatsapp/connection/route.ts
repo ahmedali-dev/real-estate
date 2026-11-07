@@ -1,8 +1,9 @@
+import { openwaRequestHeaders } from "@/lib/openwa-http";
 import { resolvedWhatsAppConfig } from "@/lib/whatsapp-settings";
 import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import { requireAdmin } from "@/lib/auth/requireSession";
-import { openwaPairingStatus, openwaAccountAvailable } from "@/lib/openwa-status";
+import { openwaPairingStatus, probeOpenwaConnection } from "@/lib/openwa-status";
 
 export const dynamic = "force-dynamic";
 const headers = { "Cache-Control": "no-store, private", "Vary": "Cookie" };
@@ -13,13 +14,17 @@ export async function GET() {
   const config = await resolvedWhatsAppConfig();
   if (!config) return NextResponse.json({ status: "setup", qr: null }, { headers });
   try {
+    const probe=await probeOpenwaConnection(config);
+    if(probe.issue)return NextResponse.json({status:probe.issue,qr:null},{headers});
     // Access this endpoint over a private network or an authenticated gateway.
     const result = await fetch(`${config.url}/health`, {
-      cache: "no-store", redirect: "error", headers: { "X-API-Key": config.key }, signal: AbortSignal.timeout(4000),
+      cache: "no-store", redirect: "error", headers: openwaRequestHeaders(config.key), signal: AbortSignal.timeout(4000),
     });
+    if(result.status===401||result.status===403)return NextResponse.json({status:"authError",qr:null},{headers});
+    if(result.headers.get("content-type")?.includes("text/html"))return NextResponse.json({status:"tunnelPage",qr:null},{headers});
     if (!result.ok) throw new Error("Service unavailable");
     const health = await result.json();
-    const connected = await openwaAccountAvailable(config);
+    const connected = probe.connected;
     // A stale /health snapshot must not hide a current pairing QR.
     const pairing = openwaPairingStatus({ ...health, connected, session: { ...health.session, ready: connected } });
     const { qr, issue } = pairing;

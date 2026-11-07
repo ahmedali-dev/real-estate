@@ -4,7 +4,7 @@ import { WhatsAppSettings } from "./WhatsAppSettings";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
-type Connection = { status: "loading" | "setup" | "offline" | "waiting" | "pairing" | "connected" | "licenseInvalid" | "blocked"; qr: string | null };
+type Connection = { status: "loading" | "setup" | "offline" | "waiting" | "pairing" | "connected" | "licenseInvalid" | "blocked" | "gatewayMissing" | "authError" | "tunnelPage"; qr: string | null };
 export function WhatsAppConnection() {
   const { t } = useLanguage();
   const [connection, setConnection] = useState<Connection>({ status: "loading", qr: null });
@@ -38,6 +38,7 @@ export function WhatsAppConnection() {
         <img src={connection.qr} alt={t("whatsappConnection.qrAlt")} width={320} height={320} className="mx-auto mt-4 h-auto max-w-full rounded-xl bg-white" />
         <p className="mt-4 text-center text-sm text-ink-600">{t("whatsappConnection.scan")}</p>
       </>}
+      {connection.status==="gatewayMissing"&&<div className="mt-4 rounded-xl bg-stone-50 p-4 text-sm text-ink-600"><p>{t("whatsappConnection.gatewayHelp")}</p><code dir="ltr" className="mt-2 block select-all">ngrok http http://127.0.0.1:8080</code></div>}
       {connection.status === "licenseInvalid" && <p className="mt-4 text-sm text-ink-600">{t("whatsappConnection.fixLicense")}</p>}
       {(connection.status === "offline" || connection.status === "setup") && <div className="mt-4 rounded-xl bg-stone-50 p-4 text-sm text-ink-600">
         <p>{t("whatsappConnection.start")}</p>

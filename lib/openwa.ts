@@ -1,3 +1,4 @@
+import { openwaRequestHeaders } from "./openwa-http";
 import { openwaAccountAvailable } from "./openwa-status";
 import type { PropertyDTO } from "@/types/property";
 import { propertyTextMessage } from "./property-message";
@@ -24,7 +25,7 @@ export async function sendOpenwa(config: NonNullable<ReturnType<typeof openwaCon
 
 async function sendRequest(config: NonNullable<ReturnType<typeof openwaConfig>>, method: string, payload: Record<string, unknown>, fetcher = fetch) {
   const response = await fetcher(`${config.url}/api/messages/${method}`, {
-    method: "POST", headers: { "Content-Type": "application/json", "X-API-Key": config.key },
+    method: "POST", headers: openwaRequestHeaders(config.key,{"Content-Type":"application/json"}),
     body: JSON.stringify(payload), redirect: "error", signal: AbortSignal.timeout(20000),
   });
   const result: unknown = await response.json();

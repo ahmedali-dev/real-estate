@@ -50,7 +50,7 @@ await new Promise((resolve, reject) => {
   gateway.once('error', reject);
   gateway.listen(publicPort, '127.0.0.1', resolve);
 });
-console.log('Office connection gateway ready.');
+console.log(`Office connection gateway ready: http://127.0.0.1:${publicPort}. Point ngrok at this port; the internal API uses ${upstreamPort}.`);
 let messagePoll;
 let stopping = false;
 async function stop() {

@@ -1,3 +1,4 @@
+import { openwaRequestHeaders } from "./openwa-http";
 export type WhatsAppGroup = { id: string; name: string };
 export function parseWhatsAppGroups(value: unknown): WhatsAppGroup[] {
   if (!Array.isArray(value)) throw new Error("Invalid group list");
@@ -14,7 +15,7 @@ export function parseWhatsAppGroups(value: unknown): WhatsAppGroup[] {
 // OpenWA 5.1 implements chat listing but not getAllGroups. Filter group IDs
 // server-side so individual chats are never exposed to the group picker.
 export async function fetchWhatsAppGroups(config: { url: string; key: string }, fetcher = fetch) {
-  const response = await fetcher(`${config.url}/api/chats/getAll`, { cache: "no-store", redirect: "error", headers: { "X-API-Key": config.key }, signal: AbortSignal.timeout(10000) });
+  const response = await fetcher(`${config.url}/api/chats/getAll`, { cache: "no-store", redirect: "error", headers: openwaRequestHeaders(config.key), signal: AbortSignal.timeout(10000) });
   const result = await response.json();
   if (!response.ok || result.success === false || result.error) throw new Error("Could not load groups");
   return parseWhatsAppGroups(result.data);
