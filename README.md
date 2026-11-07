@@ -370,3 +370,7 @@ See [the Stage 1–3 workflow, report definitions, API, and verification guide](
 ### Reuse saved owners
 
 In apartment, building and land forms, enable **I have owner information**, then choose a saved owner from the searchable dropdown or use **Add new owner**. Saved choices come from existing listings, deduplicated by name and formatted phone number; saving a new listing makes its owner available for reuse. Selecting an owner copies their contact details into the listing and does not update other listings. The lookup is staff-only; project managers can reuse owners from buildings only.
+
+### Windows Server
+
+Run `./init-windows.ps1` in PowerShell to install/configure **Real Estate**, **WhatsApp**, or **Both**. Then run `./start-windows.ps1` to choose what starts, or pass `-Component Web`, `-Component WhatsApp`, or `-Component Both`. For both components, use Node **22.22.2 or newer within 22.x**, as required by the pinned OpenWA service. See [Windows Server setup, configuration and startup](docs/WINDOWS_SERVER.md).

@@ -43,3 +43,6 @@ _IGNORE_*/
 .env
 /.next-backup-*/
 /whatsapp-service.zip
+
+# Windows Server local deployment settings
+/.windows-server.json
