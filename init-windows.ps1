@@ -60,4 +60,13 @@ try {
     Write-Host 'Setup complete. Use .\start-windows.ps1 to select what to run.' -ForegroundColor Green
     if ($Start) { & (Join-Path $PSScriptRoot 'start-windows.ps1') -Component $Component }
 }
-catch { Write-Error $_.Exception.Message; exit 1 }
+catch {
+    $failure = $_
+    $failureMessage = $failure.Exception.Message
+    if ($failure.InvocationInfo -and $failure.InvocationInfo.ScriptName) {
+        $failureMessage += [Environment]::NewLine + ('File: {0}, line {1}' -f $failure.InvocationInfo.ScriptName, $failure.InvocationInfo.ScriptLineNumber)
+    }
+    $failureMessage += [Environment]::NewLine + ('Error ID: {0}' -f $failure.FullyQualifiedErrorId)
+    Write-Error -Message $failureMessage -ErrorAction Continue
+    exit 1
+}

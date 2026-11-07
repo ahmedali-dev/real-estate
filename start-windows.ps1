@@ -28,4 +28,13 @@ try {
     & node.exe @runnerArgs
     if ($LASTEXITCODE -ne 0) { throw 'Startup stopped. Review the error above; run .\init-windows.ps1 if dependencies or configuration are missing.' }
 }
-catch { Write-Error $_.Exception.Message; exit 1 }
+catch {
+    $failure = $_
+    $failureMessage = $failure.Exception.Message
+    if ($failure.InvocationInfo -and $failure.InvocationInfo.ScriptName) {
+        $failureMessage += [Environment]::NewLine + ('File: {0}, line {1}' -f $failure.InvocationInfo.ScriptName, $failure.InvocationInfo.ScriptLineNumber)
+    }
+    $failureMessage += [Environment]::NewLine + ('Error ID: {0}' -f $failure.FullyQualifiedErrorId)
+    Write-Error -Message $failureMessage -ErrorAction Continue
+    exit 1
+}

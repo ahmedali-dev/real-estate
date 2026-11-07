@@ -143,3 +143,16 @@ Task settings reference: [Microsoft ScheduledTasks settings](https://learn.micro
 ## Verification and limits
 
 The Node configuration/launch-planning helpers have automated tests covering component isolation, runtime checks, port conflicts, secret preservation, environment generation and origin validation. Syntax, lint and TypeScript are checked in this repository. PowerShell and the actual Windows Server/Chromium startup must still be verified on a Windows host; the authoring environment is macOS.
+
+### Script not found or MethodNotFound
+
+Run setup from the repository directory using the `./` or `.\` prefix. The main filename is **init-windows.ps1**, with an **s**:
+
+```powershell
+cd C:\Apps\41-real-estate
+.\init-windows.ps1
+```
+
+`init-window.ps1` is also included as a compatibility alias. It forwards the same component/port/start options to the main script. Copy the complete repository, including `scripts\windows\common.ps1`; the entry script is not a standalone installer.
+
+The Node-version check accepts native command output as an array and parses its version without calling `.Trim()` on the output object. Setup/start failures now include their script filename, line number and error ID. If an error remains, share those details and the message, with credentials/API keys removed. These diagnostics distinguish a missing script command from an actual PowerShell `MethodNotFound` error.
