@@ -7,7 +7,7 @@ function Assert-WindowsRuntime {
     if ($env:OS -ne 'Windows_NT') { throw 'Run this script in PowerShell on Windows Server.' }
     if (-not (Get-Command node.exe -ErrorAction SilentlyContinue)) { throw 'Install Node.js LTS from https://nodejs.org/ and reopen PowerShell. For WhatsApp, use Node 22.22.2 or newer 22.x.' }
     $versionOutput = @(& node.exe --version)
-    if ($LASTEXITCODE -ne 0) { throw 'Node.js did not start successfully. Run node.exe --version to check the installation.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Node.js did not start successfully. Check node.exe --version inside this repository. An older .nvmrc may select missing Node 20.20.2; update it to 22.23.4 and re-enter the folder with your version manager.' }
     $versionText = ($versionOutput -join [Environment]::NewLine)
     if ($versionText -notmatch '(?m)^\s*v?(\d+\.\d+\.\d+)\s*$') { throw 'Could not read the Node.js version. Run node.exe --version and verify that it prints a version such as v22.22.2.' }
     $version = [version]$Matches[1]

@@ -347,7 +347,7 @@ See [deployment instructions](DEPLOYMENT.md) and [OpenWA service documentation](
 
 ### Runtime and framework
 
-The app uses Next.js 16.4.3 and React 19. Node.js 20.9 or newer is required; `.nvmrc` selects the existing Node 20.20.2 installation for local development. Run `nvm use` (or select that version in your shell), then `npm install` and `npm run dev` without `sudo`. Run `npm run lint` for ESLint and `npm run build` for the production build. Dashboard authentication is handled by `proxy.ts`.
+The app uses Next.js 16.4.3 and React 19. The project pins Node.js 22.23.4 in `.nvmrc`, which also satisfies the WhatsApp service runtime requirement. Install/select that version with your Node version manager, then run `npm install` and `npm run dev` without `sudo`. Run `npm run lint` for ESLint and `npm run build` for the production build. Dashboard authentication is handled by `proxy.ts`.
 
 ### Install on a phone or computer
 

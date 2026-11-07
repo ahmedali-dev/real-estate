@@ -11,7 +11,7 @@ The launcher uses production `next start`, not the development server. WhatsApp 
 
 Copy/clone the source repository into a local folder such as `C:\Apps\41-real-estate`. Include both `package-lock.json` files and `services\openwa`. Do not copy macOS/Linux `node_modules` or `.next` build output: setup installs and builds for Windows.
 
-Install an official **Node.js 22.x LTS** Windows x64 runtime, version **22.22.2 or newer within 22.x**, with npm included, then reopen PowerShell. This version satisfies the existing WhatsApp package's `>=22.22.2 <23` engine requirement and also runs the website. Web-only installations can use a supported even-numbered LTS release >=22. The scripts do not download or replace Node.js automatically. Do not use the repository's older macOS `.nvmrc` value for this Windows deployment.
+Install an official **Node.js 22.x LTS** Windows x64 runtime, version **22.22.2 or newer within 22.x**, with npm included, then reopen PowerShell. This version satisfies the existing WhatsApp package's `>=22.22.2 <23` engine requirement and also runs the website. Web-only installations can use a supported even-numbered LTS release >=22. The scripts do not download or replace Node.js automatically. The repository's `.nvmrc` pins 22.23.4 for both local development and this deployment.
 
 Use Windows PowerShell 5.1 or PowerShell 7. Place configuration and WhatsApp session folders on persistent local storage. The account running the app needs read/write access to this application folder, including `.next`, dependencies and the WhatsApp browser profile. Restrict NTFS access to environment files and session folders to the deployment account and administrators.
 
@@ -156,3 +156,17 @@ cd C:\Apps\41-real-estate
 `init-window.ps1` is also included as a compatibility alias. It forwards the same component/port/start options to the main script. Copy the complete repository, including `scripts\windows\common.ps1`; the entry script is not a standalone installer.
 
 The Node-version check accepts native command output as an array and parses its version without calling `.Trim()` on the output object. Setup/start failures now include their script filename, line number and error ID. If an error remains, share those details and the message, with credentials/API keys removed. These diagnostics distinguish a missing script command from an actual PowerShell `MethodNotFound` error.
+
+### Node works outside the repository but fails inside it
+
+Older checkouts pinned **20.20.2** in `.nvmrc`. A directory-aware version manager may automatically select that missing version when you enter the project, even if Node 22 works elsewhere. The current pin is **22.23.4**. To fix an older Windows checkout immediately, run these commands from its repository folder:
+
+```powershell
+Set-Content -LiteralPath .nvmrc -Value '22.23.4' -Encoding ASCII
+Set-Location ..
+Set-Location .\real-estate
+node.exe --version
+.\init-windows.ps1 -Component WhatsApp
+```
+
+The version check should print `v22.23.4`. If your version manager does not switch automatically, select/install that version with the manager you already use, then rerun setup. Do not install Node 20 to work around the stale pin: the WhatsApp service requires Node 22.x.

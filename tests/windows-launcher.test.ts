@@ -3,6 +3,7 @@ import test from 'node:test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {parseEnv} from 'node:util';
 import {configure,envLine,siteOrigin} from '../scripts/windows/configure.mjs';
 import {supportedRuntime,launchPlan,requireFiles} from '../scripts/windows/run.mjs';
@@ -56,4 +57,9 @@ test('environment generation protects line boundaries and Next.js dollar expansi
 test('website origins require HTTPS except loopback, and reject URL credentials or paths',()=>{
  assert.equal(siteOrigin('https://example.com/'),'https://example.com');assert.equal(siteOrigin('http://localhost:3000'),'http://localhost:3000');
  for(const value of ['http://example.com','https://user:password@example.com','https://example.com/path','https://example.com/?secret=x'])assert.throws(()=>siteOrigin(value));
+});
+
+test('repository runtime pin satisfies both web and WhatsApp requirements',()=>{
+ const pin=fs.readFileSync(fileURLToPath(new URL('../.nvmrc',import.meta.url)),'utf8').trim();
+ assert.equal(supportedRuntime(pin,'Both'),true);
 });
