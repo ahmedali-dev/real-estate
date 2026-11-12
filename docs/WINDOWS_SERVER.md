@@ -206,6 +206,8 @@ The default gateway is **8080**; **8081** is its internal upstream. If you chang
 
 The app's server-side health, readiness, group and send requests include `Accept: application/json`, `X-API-Key`, and `ngrok-skip-browser-warning: 1`. This uses ngrok's documented client-header mechanism while keeping API authentication in place. An ordinary browser visit to the tunnel can still show ngrok's free-tier interstitial because address-bar navigation does not add this header. View the QR through the protected website dashboard rather than the tunnel root. See [ngrok free-plan interstitial documentation](https://ngrok.com/docs/pricing-limits/free-plan-limits).
 
+The service captures OpenWA's generated QR from its CLI output and exposes it only through the authenticated `/office/connection` gateway. After updating the service, restart it and keep ngrok pointed at the gateway port. The app can then show the QR even when OpenWA's `/health` response has `qr: null`.
+
 The dashboard distinguishes a missing gateway, rejected API key, an HTML response and an unreachable service. This transport change does not reset the WhatsApp session or guarantee Chromium can start; if the correct gateway is reachable but pairing stays blocked, inspect the service terminal for its actual startup error. Update/redeploy the web application for the header handling and clearer dashboard errors to take effect.
 
 ### Saved WhatsApp key cannot decrypt (`Unsupported state or unable to authenticate data`)

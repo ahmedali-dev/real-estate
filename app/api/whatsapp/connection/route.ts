@@ -27,7 +27,7 @@ export async function GET() {
     const health = await result.json();
     const connected = probe.connected;
     // A stale /health snapshot must not hide a current pairing QR.
-    const pairing = openwaPairingStatus({ ...health, connected, session: { ...health.session, ready: connected } });
+    const pairing = openwaPairingStatus({ ...health, qr: probe.qr || health.qr, connected, session: { ...health.session, ready: connected } });
     const { qr, issue } = pairing;
     const image = qr ? await QRCode.toDataURL(qr, { width: 320, margin: 4, errorCorrectionLevel: "M" }) : null;
     return NextResponse.json({ status: connected ? "connected" : issue || (image ? "pairing" : "waiting"), qr: image }, { headers });

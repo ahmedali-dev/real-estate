@@ -44,6 +44,8 @@ Use your normal certificate provisioning and firewall configuration. No inbound 
 4. Set the public property website URL and automatic reply language.
 5. Save, check connection, and scan the pairing QR with WhatsApp → Linked devices.
 
+The gateway captures the OpenWA CLI's generated pairing QR and serves it through authenticated `GET /office/connection`; this lets the website display the QR even if `/health` reports `qr: null`. Restart the service after updating this folder, and keep the ngrok or HTTPS reverse proxy pointed at the gateway port (8080 by default), not the internal OpenWA port (8081).
+
 Settings are stored in MongoDB. The API key is encrypted using the website's NEXTAUTH_SECRET; preserve that secret or re-enter the key after changing it. The key is never returned to the browser by the settings API. Existing environment settings remain the fallback until admin settings are saved.
 
 Website settings do not rewrite the remote service's `.env`. Set WHATSAPP_WEBHOOK_URL on the service itself and restart it after changing that value or its API key. The webhook and outbound API currently share the same key.

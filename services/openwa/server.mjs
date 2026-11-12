@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { startCli, parseCliArgs } from '@open-wa/wa-automate';
+import { getCliOutputSink, setCliOutputSink, startCli, parseCliArgs } from '@open-wa/wa-automate';
 
 // Register the gateway before OpenWA waits for pairing. Its Hono router is
 // finalized on the first request, so routes added after startup are unreliable.
@@ -10,6 +10,23 @@ const upstreamPort = publicPort + 1;
 if (portIndex >= 0) args[portIndex + 1] = String(upstreamPort);
 else args.push('--port', String(upstreamPort));
 let runtime;
+// OpenWA 5.1 emits its pairing string during startup (and prints it to the
+// local terminal). Keep a private copy so the authenticated website gateway
+// can render it even when /health omits the QR field.
+let pairingQr = null;
+const consoleSink = getCliOutputSink();
+setCliOutputSink({
+  write(entry) { consoleSink.write(entry); },
+  status(update) {
+    if (update.phase === 'client.ready') pairingQr = null;
+    consoleSink.status(update);
+  },
+  qr(payload) {
+    const value = payload?.qr;
+    pairingQr = typeof value === 'string' && value.length <= 8192 ? value : null;
+    consoleSink.qr(payload);
+  },
+});
 const webhookStatus = { enabled: false, received: 0, forwarded: 0, ignored: 0, lastResult: null };
 const gateway = http.createServer(async (request, response) => {
   // Protect every route, including health/QR data, before proxying upstream.
@@ -35,8 +52,9 @@ const gateway = http.createServer(async (request, response) => {
         const offline = document.querySelector('[data-testid="alert-phone"], [data-testid="alert-computer"]');
         return Boolean(chats && !pairing && !offline);
       }, undefined) : false;
-      response.end(JSON.stringify({ connected: connected === true }));
-    } catch { response.end(JSON.stringify({ connected: false })); }
+      const isConnected = connected === true;
+      response.end(JSON.stringify({ connected: isConnected, qr: isConnected ? null : pairingQr }));
+    } catch { response.end(JSON.stringify({ connected: false, qr: pairingQr })); }
     return;
   }
   const upstream = http.request({ hostname: '127.0.0.1', port: upstreamPort, path: request.url, method: request.method, headers: request.headers }, result => {
