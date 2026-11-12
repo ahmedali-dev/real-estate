@@ -200,6 +200,7 @@ export async function POST(req: NextRequest) {
     }
     const payload = {
       ...data,
+      ...(data.localVideo === null ? { localVideo: undefined } : {}),
       propertyType: data.category === "apartment" ? data.propertyType : undefined,
       broughtBy: selectedUser ? { userId: selectedUser._id.toString(), name: selectedUser.name } : undefined,
       rentalPeriod: data.listingType === "rent" ? data.rentalPeriod : undefined,

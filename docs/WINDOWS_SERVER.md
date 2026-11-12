@@ -47,7 +47,7 @@ Or choose explicitly:
 
 Setup resolves `npm.exe` (used by some Windows version managers) or `npm.cmd` (the official installer shim), then runs `ci` independently for each selected component. It invokes the resolved native application directly, without requiring `npm.ps1` execution-policy changes. The web installation includes build dependencies even if the server's environment is production. OpenWA/browser installation may take several minutes.
 
-The setup prompts for the public website origin, a masked MongoDB URI, and an optional masked Cloudinary URL. Blank secret prompts keep existing values. For a fresh web setup the MongoDB URI is required. Encode special characters in URI usernames/passwords. Production origins use HTTPS; HTTP is accepted for loopback addresses only. Use just the origin, such as `https://www.41real-estate.site`, without a path.
+The setup prompts for the public website origin, an optional masked original `NEXTAUTH_SECRET` for database reuse, a masked MongoDB URI, and an optional masked Cloudinary URL. Blank secret prompts keep existing values. For a fresh web setup the MongoDB URI is required. Encode special characters in URI usernames/passwords. Production origins use HTTPS; HTTP is accepted for loopback addresses only. Use just the origin, such as `https://www.41real-estate.site`, without a path.
 
 Configuration behavior:
 
@@ -207,3 +207,18 @@ The default gateway is **8080**; **8081** is its internal upstream. If you chang
 The app's server-side health, readiness, group and send requests include `Accept: application/json`, `X-API-Key`, and `ngrok-skip-browser-warning: 1`. This uses ngrok's documented client-header mechanism while keeping API authentication in place. An ordinary browser visit to the tunnel can still show ngrok's free-tier interstitial because address-bar navigation does not add this header. View the QR through the protected website dashboard rather than the tunnel root. See [ngrok free-plan interstitial documentation](https://ngrok.com/docs/pricing-limits/free-plan-limits).
 
 The dashboard distinguishes a missing gateway, rejected API key, an HTML response and an unreachable service. This transport change does not reset the WhatsApp session or guarantee Chromium can start; if the correct gateway is reachable but pairing stays blocked, inspect the service terminal for its actual startup error. Update/redeploy the web application for the header handling and clearer dashboard errors to take effect.
+
+### Saved WhatsApp key cannot decrypt (`Unsupported state or unable to authenticate data`)
+
+The dashboard's saved API key is encrypted with a key derived from `NEXTAUTH_SECRET`. A new secret on another deployment using the same database makes the old ciphertext unreadable. Corrupted ciphertext can produce the same error.
+
+1. Keep a stable **matching `NEXTAUTH_SECRET` on every website instance sharing this database**. Prefer restoring the original secret from the previous deployment. Do not generate a new secret as a repair; doing so invalidates sessions and other encrypted integration settings again.
+2. Restart the website after changing its environment, and sign in again if needed.
+3. Open **Dashboard → WhatsApp settings**, enter the service's existing `OPENWA_API_KEY` again and save. This re-encrypts the service key using the current server secret. If the original secret is unavailable, keep the current secret stable and re-save the service key; align all instances first.
+4. Refresh the WhatsApp connection. No WhatsApp browser profile reset or database deletion is needed for this encryption recovery.
+
+The settings form now flags unreadable credentials and requires API-key re-entry; saving a blank key cannot retain broken ciphertext. The connection endpoint reports `credentialsInvalid` rather than exposing a cryptography stack trace or returning a decryption-related 500. Other WhatsApp actions fail closed while configuration is unreadable; they do not silently fall back to an environment key for a possibly different server. Settings responses never reveal the saved key.
+
+Windows setup now includes a masked prompt for the original deployment secret when reusing its database. Leaving it blank preserves an existing local secret, or generates one for an unconfigured installation; copying an existing database's original secret is still the operator's responsibility. Setup refuses implicit rotation of an already configured secret.
+
+Errors whose stack begins with `chrome-extension://...` come from browser extension code. They are separate from this server-side decryption failure; test the dashboard in a clean browser profile if those errors continue. Do not suppress application exceptions to hide extension errors.

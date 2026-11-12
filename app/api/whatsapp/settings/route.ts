@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/requireSession";
-import { encryptWhatsAppKey, savedWhatsAppSettings, whatsappSettingsCollection } from "@/lib/whatsapp-settings";
+import { encryptWhatsAppKey, whatsAppKeyReadable, savedWhatsAppSettings, whatsappSettingsCollection } from "@/lib/whatsapp-settings";
 import { publicSiteOrigin, configuredPublicSiteOrigin } from "@/lib/site-url";
 const headers = { "Cache-Control": "no-store, private" };
 const schema = z.object({
@@ -14,7 +14,8 @@ export async function GET() {
   const { response } = await requireAdmin(); if (response) return response;
   try {
     const saved = await savedWhatsAppSettings();
-    return NextResponse.json({ url: saved?.url || process.env.OPENWA_API_URL || "", hasKey: Boolean(saved?.encryptedKey || process.env.OPENWA_API_KEY), siteUrl: saved?.siteUrl || configuredPublicSiteOrigin() || "", replyLocale: saved?.replyLocale || (process.env.WHATSAPP_REPLY_LOCALE === "en" ? "en" : "ar"), source: saved ? "database" : "environment" }, { headers });
+    const requiresKey=Boolean(saved&&!whatsAppKeyReadable(saved.encryptedKey));
+    return NextResponse.json({ requiresKey,url: saved?.url || process.env.OPENWA_API_URL || "", hasKey: saved?!requiresKey:Boolean(process.env.OPENWA_API_KEY), siteUrl: saved?.siteUrl || configuredPublicSiteOrigin() || "", replyLocale: saved?.replyLocale || (process.env.WHATSAPP_REPLY_LOCALE === "en" ? "en" : "ar"), source: saved ? "database" : "environment" }, { headers });
   } catch { return NextResponse.json({ error: "Could not load settings." }, { status: 500, headers }); }
 }
 export async function PUT(req: NextRequest) {
@@ -25,6 +26,7 @@ export async function PUT(req: NextRequest) {
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues.map(issue => issue.message).join(" ") }, { status: 400 });
     const old = await savedWhatsAppSettings();
     const key = parsed.data.apiKey || (!old ? process.env.OPENWA_API_KEY : "");
+    if(!key&&old&&!whatsAppKeyReadable(old.encryptedKey))return NextResponse.json({code:"credentialsInvalid",error:"The saved API key cannot be decrypted with this server secret. Re-enter the WhatsApp service API key and save again."},{status:409,headers});
     if (!key && !old?.encryptedKey) return NextResponse.json({ error: "API key is required." }, { status: 400 });
     await (await whatsappSettingsCollection()).updateOne({ _id: "whatsapp" }, { $set: { url: parsed.data.url.replace(/\/$/, ""), encryptedKey: key ? encryptWhatsAppKey(key) : old!.encryptedKey, siteUrl: publicSiteOrigin(parsed.data.siteUrl)!, replyLocale: parsed.data.replyLocale, updatedAt: new Date() } }, { upsert: true });
     return NextResponse.json({ success: true }, { headers });

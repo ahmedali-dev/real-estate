@@ -68,6 +68,7 @@ export function serializeProperty(doc: PropertyHydrated, includeStaffFields = fa
     })),
     images: obj.images ?? [],
     tiktokUrl: obj.tiktokUrl || undefined,
+    localVideo: includeStaffFields ? obj.localVideo : undefined,
     createdAt: new Date(obj.createdAt).toISOString(),
     updatedAt: new Date(obj.updatedAt).toISOString(),
   };

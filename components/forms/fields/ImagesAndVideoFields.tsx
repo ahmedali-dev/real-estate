@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalVideoUpload } from "./LocalVideoUpload";
 import { Icon } from "@/components/ui/Icon";
 
 import { useEffect, useRef, useState } from "react";
@@ -85,6 +86,7 @@ export function ImagesAndVideoFields({
 
   return (
     <>
+      <LocalVideoUpload onBusyChange={value => update("videoUploading", value)} value={form.localVideo} onChange={value => update("localVideo", value)} />
       <section aria-busy={coverStatus === "loading"}>
         <h3 className="flex flex-wrap items-center gap-2 font-display text-base font-semibold text-ink-800"><Icon name="video" className="h-5 w-5 text-moss-500" />{t("form.videoSection")}</h3>
         <p className="mt-1 text-sm text-ink-400">{t("form.videoHint")}</p>

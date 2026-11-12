@@ -1,5 +1,5 @@
 import { openwaRequestHeaders } from "@/lib/openwa-http";
-import { resolvedWhatsAppConfig } from "@/lib/whatsapp-settings";
+import { whatsAppConfigurationState } from "@/lib/whatsapp-settings";
 import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import { requireAdmin } from "@/lib/auth/requireSession";
@@ -11,9 +11,10 @@ const headers = { "Cache-Control": "no-store, private", "Vary": "Cookie" };
 export async function GET() {
   const { response } = await requireAdmin();
   if (response) return response;
-  const config = await resolvedWhatsAppConfig();
-  if (!config) return NextResponse.json({ status: "setup", qr: null }, { headers });
   try {
+    const {config,credentialIssue}=await whatsAppConfigurationState();
+    if(credentialIssue)return NextResponse.json({status:"credentialsInvalid",qr:null},{headers});
+    if(!config)return NextResponse.json({status:"setup",qr:null},{headers});
     const probe=await probeOpenwaConnection(config);
     if(probe.issue)return NextResponse.json({status:probe.issue,qr:null},{headers});
     // Access this endpoint over a private network or an authenticated gateway.

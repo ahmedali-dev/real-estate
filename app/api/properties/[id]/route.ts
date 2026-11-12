@@ -96,6 +96,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
     const payload = {
       ...data,
+      ...(data.localVideo === null ? { localVideo: undefined } : {}),
       propertyType: data.category === "apartment" ? data.propertyType : undefined,
       broughtBy: selectedUser ? { userId: selectedUser._id.toString(), name: selectedUser.name } : undefined,
       price: data.price,
@@ -126,7 +127,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const set: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(payload)) {
       if (value === undefined) {
-        if (["propertyType", "broughtBy", "price", "rentalPeriod", "tiktokUrl", "owner", "location", "details", "tenant"].includes(key)) {
+        if (["propertyType", "broughtBy", "price", "rentalPeriod", "tiktokUrl", "localVideo", "owner", "location", "details", "tenant"].includes(key)) {
           unset[key] = "";
         }
       } else {

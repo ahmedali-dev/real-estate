@@ -54,6 +54,7 @@ function isActive(pathname: string, href: string) {
         !pathname.startsWith("/dashboard/orders") &&
         !pathname.startsWith("/dashboard/users") &&
         !pathname.startsWith("/dashboard/whatsapp") &&
+        !pathname.startsWith("/dashboard/video-upload") &&
         !pathname.startsWith("/dashboard/management"))
     );
   }
@@ -123,6 +124,7 @@ export function SidebarNav({ onNavigate, collapsed = false }: { onNavigate?: () 
   if (role === "admin") {
     adminItems.push({ href: "/dashboard/users", labelKey: "nav.users", mark: "users" });
     adminItems.push({ href: "/dashboard/whatsapp", labelKey: "whatsappConnection.title", mark: "phone" });
+    adminItems.push({ href: "/dashboard/video-upload", labelKey: "nav.videoUpload", mark: "video" });
   }
 
   if (collapsed) return <nav className="estate-sidebar-rail flex h-full flex-col items-center gap-3 overflow-y-auto">

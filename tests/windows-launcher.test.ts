@@ -63,3 +63,10 @@ test('repository runtime pin satisfies both web and WhatsApp requirements',()=>{
  const pin=fs.readFileSync(fileURLToPath(new URL('../.nvmrc',import.meta.url)),'utf8').trim();
  assert.equal(supportedRuntime(pin,'Both'),true);
 });
+
+test('Windows setup can reuse the original deployment secret and refuses implicit rotation',()=>fixture(root=>{
+ const original='original-production-server-secret';configure(root,{component:'Web',mongodbUri:mongo,authSecret:original},{});
+ const env=parseEnv(fs.readFileSync(path.join(root,'.env.local'),'utf8'));assert.equal(env.NEXTAUTH_SECRET,original);
+ assert.throws(()=>configure(root,{component:'Web',authSecret:'different-secret'},env),/will not rotate/);
+ assert.equal(parseEnv(fs.readFileSync(path.join(root,'.env.local'),'utf8')).NEXTAUTH_SECRET,original);
+}));

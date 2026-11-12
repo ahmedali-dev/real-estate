@@ -62,6 +62,7 @@ export interface PropertyDocument {
   units: ApartmentUnit[];
   images: string[];
   tiktokUrl?: string;
+  localVideo?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -176,6 +177,7 @@ const PropertySchema = new Schema<PropertyDocument>(
       type: [String],
       default: [],
     },
+    localVideo: { type: String },
     tiktokUrl: { type: String, trim: true },
   },
   { timestamps: true }
@@ -326,7 +328,7 @@ export type PropertyHydrated = HydratedDocument<PropertyDocument>;
 // Mongoose silently strips unknown fields from updates, so replace that stale
 // model rather than losing the selected offer source or property type.
 const cachedProperty = mongoose.models.Property as Model<PropertyDocument> | undefined;
-if (cachedProperty && (!cachedProperty.schema.path("broughtBy.userId") || !cachedProperty.schema.path("propertyType") || !cachedProperty.schema.path("management") || !cachedProperty.schema.path("managementRegistered") || !cachedProperty.schema.path("managementRevision"))) {
+if (cachedProperty && (!cachedProperty.schema.path("localVideo") || !cachedProperty.schema.path("broughtBy.userId") || !cachedProperty.schema.path("propertyType") || !cachedProperty.schema.path("management") || !cachedProperty.schema.path("managementRegistered") || !cachedProperty.schema.path("managementRevision"))) {
   mongoose.deleteModel("Property");
 }
 

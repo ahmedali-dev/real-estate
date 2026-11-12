@@ -43,6 +43,18 @@ try{
   step="start";let ready=false;for(let i=0;i<40;i++){try{await fetch(origin+"/login");ready=true;break;}catch{await new Promise(resolve=>setTimeout(resolve,250));}}assert.ok(ready);
   step="authentication";await login("admin");await login("project_manager");await login("sales_officer");
   const anon=await call("/api/property-management/records?propertyId="+ids.admin,{role:"anonymous"});assert.equal(anon.response.status,401);
+  step="WhatsApp credential recovery";
+  await connection.collection("integration_settings").insertOne({_id:"whatsapp",url:"https://wa.invalid",encryptedKey:"encrypted-with-a-previous-deployment",siteUrl:"https://example.com",replyLocale:"ar",updatedAt:new Date()});
+  const settingsBefore=await call("/api/whatsapp/settings");assert.equal(settingsBefore.response.status,200);assert.equal(settingsBefore.result.requiresKey,true);assert.equal(settingsBefore.result.hasKey,false);assert.equal(settingsBefore.result.encryptedKey,undefined);
+  const brokenConnection=await call("/api/whatsapp/connection");assert.equal(brokenConnection.response.status,200);assert.equal(brokenConnection.result.status,"credentialsInvalid");assert.equal(brokenConnection.result.qr,null);
+  const settingsBody={url:"https://wa.invalid",siteUrl:"https://example.com",replyLocale:"ar",apiKey:""};
+  const blankSave=await call("/api/whatsapp/settings",{method:"PUT",body:settingsBody});assert.equal(blankSave.response.status,409);
+  const testServiceKey=crypto.randomBytes(32).toString("hex");
+  const repairedSave=await call("/api/whatsapp/settings",{method:"PUT",body:{...settingsBody,apiKey:testServiceKey}});assert.equal(repairedSave.response.status,200);
+  const settingsAfter=await call("/api/whatsapp/settings");assert.equal(settingsAfter.result.requiresKey,false);assert.equal(settingsAfter.result.hasKey,true);assert.equal(JSON.stringify(settingsAfter.result).includes(testServiceKey),false);
+  const storedIntegration=await connection.collection("integration_settings").findOne({_id:"whatsapp"});assert.ok(storedIntegration.encryptedKey.includes("."));assert.equal(storedIntegration.encryptedKey.includes(testServiceKey),false);
+  assert.equal((await call("/api/whatsapp/settings",{role:"anonymous"})).response.status,401);
+  console.log("PASS: unreadable WhatsApp credentials return a recovery state, blank-key save is rejected, re-entry repairs encrypted storage without exposing keys.");
   step="create isolated properties";
   const listing={title:"Stage1 isolated building",description:"Temporary integration test property.",listingType:"sale",owner:{name:"Reusable owner",phone:"0551234567",email:"owner@stage1.invalid",notes:"Owner note"},units:[{number:"101"},{number:"102"}]};
   const created=await call("/api/properties",{method:"POST",body:{...listing,category:"build"}});assert.equal(created.response.status,201);const propertyId=created.result.data._id;

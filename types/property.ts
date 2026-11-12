@@ -74,6 +74,7 @@ export interface PropertyDTO {
   units: ApartmentUnit[];
   images: string[];
   tiktokUrl?: string;
+  localVideo?: string;
   createdAt: string;
   updatedAt: string;
 }

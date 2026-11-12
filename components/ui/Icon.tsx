@@ -1,6 +1,7 @@
 import type { SVGProps } from "react";
 
 const paths = {
+  printer: "M6 9V3h12v6M6 17H3V9h18v8h-3M6 14h12v7H6zM17 12h.01",
   eye: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12ZM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
   download: "M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5",
   sidebarExpand: "M3 4h18v16H3zM8 4v16M12 9l3 3-3 3",

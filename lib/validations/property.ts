@@ -1,3 +1,4 @@
+import { validVideoReceipt } from "@/lib/local-video";
 import { z } from "zod";
 import { isGoogleMapsUrl } from "@/lib/maps";
 
@@ -68,6 +69,7 @@ export const propertyInputSchema = z
     tenant: tenantSchema.optional(),
     units: z.array(unitSchema).max(200).default([]),
     images: z.array(z.string().trim().min(1)).default([]),
+    localVideo: z.string().max(4096).refine(validVideoReceipt, "Attach a completed video upload.").nullable().optional(),
     tiktokUrl: z
       .string()
       .trim()

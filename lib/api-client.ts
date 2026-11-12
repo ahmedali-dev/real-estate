@@ -44,11 +44,13 @@ export function buildQuery(filters: Partial<FilterState> & { page?: number; limi
 }
 
 export async function fetchProperties(
-  filters: Partial<FilterState> & { page?: number; limit?: number } = {}
+  filters: Partial<FilterState> & { page?: number; limit?: number } = {},
+  signal?: AbortSignal
 ): Promise<PropertyListResponse> {
   const qs = buildQuery(filters);
   const res = await fetch(`/api/properties${qs ? `?${qs}` : ""}`, {
     cache: "no-store",
+    signal,
   });
   return handle<PropertyListResponse>(res);
 }

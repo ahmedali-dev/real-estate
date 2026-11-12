@@ -4,7 +4,7 @@ import { WhatsAppSettings } from "./WhatsAppSettings";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
-type Connection = { status: "loading" | "setup" | "offline" | "waiting" | "pairing" | "connected" | "licenseInvalid" | "blocked" | "gatewayMissing" | "authError" | "tunnelPage"; qr: string | null };
+type Connection = { status: "loading" | "setup" | "offline" | "waiting" | "pairing" | "connected" | "licenseInvalid" | "blocked" | "gatewayMissing" | "authError" | "tunnelPage" | "credentialsInvalid"; qr: string | null };
 export function WhatsAppConnection() {
   const { t } = useLanguage();
   const [connection, setConnection] = useState<Connection>({ status: "loading", qr: null });

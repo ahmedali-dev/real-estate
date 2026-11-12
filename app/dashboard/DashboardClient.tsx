@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { readDashboardUrl, writeDashboardUrl } from "@/lib/dashboard-url";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { DashboardExport } from "@/components/dashboard/DashboardExport";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { ListingsTable } from "@/components/dashboard/ListingsTable";
 import { FilterBar, type FilterState } from "@/components/properties/FilterBar";
@@ -129,6 +130,8 @@ function DashboardContent({ publicOrigin }: { publicOrigin: string | null }) {
         </div>
         <FilterBar staffFilters value={filters} onChange={value => { requestVersion.current++; navigate(value, 1, pageSize); }} hideCategory={isProjectManager} />
       </div>
+
+      <DashboardExport filters={filters} properties={properties} total={total} ready={status === "ready"} page={page} />
 
       <div ref={results} className="mb-4 flex scroll-mt-6 flex-wrap items-center justify-between gap-3">
         <p role="status" className="text-sm text-ink-500">{status === "ready" ? (locale === "ar" ? `عرض ${total ? (page - 1) * pageSize + 1 : 0}–${Math.min(page * pageSize, total)} من ${total} عقار` : `Showing ${total ? (page - 1) * pageSize + 1 : 0}–${Math.min(page * pageSize, total)} of ${total} properties`) : ""}</p>

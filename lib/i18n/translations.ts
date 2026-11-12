@@ -8,6 +8,7 @@ export const translations = {
       description: "Link the office WhatsApp account to send property messages with links.",
       loading: "Checking connection…",
       setup: "OpenWA settings are missing.",
+      credentialsInvalid: "The saved WhatsApp API key cannot be decrypted. Re-enter it in the settings above and save, or restore the original NEXTAUTH_SECRET.",
       gatewayMissing: "The office gateway endpoint was not found. Check the tunnel target and service version.",
       gatewayHelp: "Start the project's WhatsApp service and tunnel its gateway port (8080 by default), not its internal API (8081). If PORT was changed, tunnel that PORT. Save the HTTPS tunnel URL in WhatsApp settings.",
       authError: "The WhatsApp server rejected the API key. Check that the app and service use the same key.",
@@ -37,6 +38,7 @@ export const translations = {
       save: "Save",
     },
     nav: {
+      videoUpload: "Video upload settings",
       brand: "41 للعقارت",
       browse: "Browse",
       dashboard: "Dashboard",
@@ -278,6 +280,7 @@ export const translations = {
       tenantIdNumber: "ID number",
     },
     form: {
+      waitForVideoUpload: "Wait for the video upload to finish, or pause it before saving.",
       newEyebrow: "New listing",
       newTitle: "Add a listing",
       newSubtitle: "Fill in the details below. Land listings are automatically set to sale-only.",
@@ -429,6 +432,7 @@ export const translations = {
       description: "اربط حساب واتساب المكتب لإرسال العقارات مع روابطها.",
       loading: "جارٍ التحقق من الاتصال…",
       setup: "إعدادات OpenWA غير مكتملة.",
+      credentialsInvalid: "تعذر فك تشفير مفتاح واتساب المحفوظ. أدخله مجددًا في الإعدادات أعلاه واحفظ، أو استعد قيمة NEXTAUTH_SECRET الأصلية.",
       gatewayMissing: "لم يُعثر على مسار بوابة المكتب. تحقق من منفذ النفق وإصدار الخدمة.",
       gatewayHelp: "شغّل خدمة واتساب الخاصة بالمشروع ووجّه النفق إلى منفذ البوابة (8080 افتراضيًا)، وليس الواجهة الداخلية (8081). إذا غيّرت PORT فاستخدم قيمته. احفظ رابط النفق HTTPS في إعدادات واتساب.",
       authError: "رفض خادم واتساب مفتاح API. تحقق من تطابق المفتاح في التطبيق والخدمة.",
@@ -458,6 +462,7 @@ export const translations = {
       save: "حفظ",
     },
     nav: {
+      videoUpload: "إعدادات رفع الفيديو",
       brand: "41 للعقارت",
       browse: "تصفح",
       dashboard: "لوحة التحكم",
@@ -705,6 +710,7 @@ export const translations = {
       tenantIdNumber: "رقم الهوية",
     },
     form: {
+      waitForVideoUpload: "انتظر اكتمال رفع الفيديو أو أوقفه مؤقتاً قبل الحفظ.",
       newEyebrow: "عقار جديد",
       newTitle: "إضافة عقار",
       newSubtitle: "املأ التفاصيل أدناه. تُحدَّد عقارات الأراضي تلقائيًا للبيع فقط.",

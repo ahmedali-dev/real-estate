@@ -39,6 +39,8 @@ export interface ListingFormState {
   address: string;
   images: string[];
   tiktokUrl: string;
+  localVideo?: string | null;
+  videoUploading?: boolean;
   rooms: string;
   bathrooms: string;
   hasKitchen: boolean;
@@ -111,6 +113,7 @@ function initialState(category: Category, property?: PropertyDTO): ListingFormSt
     address: property.location?.address ?? "",
     images: property.images,
     tiktokUrl: property.tiktokUrl ?? "",
+    localVideo: property.localVideo,
     rooms: property.details?.rooms != null ? String(property.details.rooms) : "",
     bathrooms: property.details?.bathrooms != null ? String(property.details.bathrooms) : "",
     hasKitchen: property.details?.hasKitchen ?? false,
@@ -294,6 +297,7 @@ export function useListingFormState(category: Category, property?: PropertyDTO) 
         : [],
       images: form.images,
       tiktokUrl: form.tiktokUrl.trim() || undefined,
+      localVideo: form.localVideo,
     };
   }, [form, category, isLand, isBuild]);
 
@@ -301,6 +305,7 @@ export function useListingFormState(category: Category, property?: PropertyDTO) 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (submissionPending.current) return;
+    if (form.videoUploading) { setSubmitError(t("form.waitForVideoUpload")); return; }
     submissionPending.current = true;
     setSubmitError(null);
     setErrors({});

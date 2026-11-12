@@ -41,10 +41,11 @@ export function configure(appRoot,input,webConfig={}){
  if(web&&whatsapp&&webConfig.OPENWA_API_URL&&webConfig.OPENWA_API_URL.replace(/\/$/,'')!==`http://127.0.0.1:${servicePort}`)throw new WindowsSetupError('The website already targets a different WhatsApp server. Select components separately or explicitly update OPENWA_API_URL.');
  if(web&&input.mongodbUri&&webConfig.MONGODB_URI&&input.mongodbUri!==webConfig.MONGODB_URI)throw new WindowsSetupError('MONGODB_URI is already configured. Edit the existing environment file explicitly to change databases.');
  if(web&&input.cloudinaryUrl&&webConfig.CLOUDINARY_URL&&input.cloudinaryUrl!==webConfig.CLOUDINARY_URL)throw new WindowsSetupError('CLOUDINARY_URL is already configured. Edit the existing environment file explicitly to replace it.');
+ if(web&&input.authSecret&&webConfig.NEXTAUTH_SECRET&&input.authSecret!==webConfig.NEXTAUTH_SECRET)throw new WindowsSetupError("NEXTAUTH_SECRET already exists. Setup will not rotate it. Restore the original value explicitly if this server must share an existing database.");
  const mongodb=webConfig.MONGODB_URI||input.mongodbUri;
  if(web&&(!mongodb||!/^mongodb(?:\+srv)?:\/\//.test(mongodb)))throw new WindowsSetupError('Provide your MongoDB Atlas/replica-set URI when prompted. No database or demo admin is created automatically.');
  if(web){
-  appendMissing(path.join(appRoot,'.env.local'),{MONGODB_URI:mongodb,NEXTAUTH_SECRET:crypto.randomBytes(32).toString('hex'),SITE_URL:site,NEXTAUTH_URL:site,CLOUDINARY_URL:input.cloudinaryUrl,...(whatsapp?{OPENWA_API_URL:`http://127.0.0.1:${servicePort}`,OPENWA_API_KEY:key}:{})},webConfig,true);
+  appendMissing(path.join(appRoot,'.env.local'),{MONGODB_URI:mongodb,NEXTAUTH_SECRET:input.authSecret||crypto.randomBytes(32).toString('hex'),SITE_URL:site,NEXTAUTH_URL:site,CLOUDINARY_URL:input.cloudinaryUrl,...(whatsapp?{OPENWA_API_URL:`http://127.0.0.1:${servicePort}`,OPENWA_API_KEY:key}:{})},webConfig,true);
   fs.writeFileSync(settingsFile,JSON.stringify({webPort},null,2)+'\n',{mode:0o600});
  }
  if(whatsapp)appendMissing(serviceFile,{OPENWA_API_KEY:key,PORT:servicePort,WA_USER_DATA_DIR:'./_IGNORE_property-office-user',WHATSAPP_WEBHOOK_URL:(web?`http://127.0.0.1:${webPort}`:site)+'/api/webhooks/whatsapp'},service);

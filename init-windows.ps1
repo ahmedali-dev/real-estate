@@ -35,18 +35,20 @@ try {
     $siteUrl = Read-Host 'Public website URL (HTTPS; leave blank to keep existing or use localhost)'
     $mongo = ''
     $cloudinary = ''
+    $authSecret = ''
     if ($web) {
+        $authSecret = Read-PrivateValue 'Existing deployment NEXTAUTH_SECRET if reusing its database (blank keeps existing or generates a new secret)'
         $mongo = Read-PrivateValue 'MongoDB replica-set/Atlas URI (leave blank to keep existing)'
         $cloudinary = Read-PrivateValue 'Cloudinary URL for image uploads (optional; blank keeps existing)'
     }
-    $payload = @{ component=$Component; webPort=$WebPort; siteUrl=$siteUrl; mongodbUri=$mongo; cloudinaryUrl=$cloudinary } | ConvertTo-Json -Compress
+    $payload = @{ component=$Component; webPort=$WebPort; siteUrl=$siteUrl; mongodbUri=$mongo; cloudinaryUrl=$cloudinary; authSecret=$authSecret } | ConvertTo-Json -Compress
     $savedOutputEncoding = $OutputEncoding
     try {
         $OutputEncoding = New-Object System.Text.UTF8Encoding $false
         $payload | & node.exe (Join-Path $PSScriptRoot 'scripts\windows\configure.mjs')
         if ($LASTEXITCODE -ne 0) { throw 'Configuration is incomplete. Follow the message above and rerun setup.' }
     }
-    finally { $OutputEncoding = $savedOutputEncoding; $payload = $null; $mongo = $null; $cloudinary = $null }
+    finally { $OutputEncoding = $savedOutputEncoding; $payload = $null; $mongo = $null; $cloudinary = $null; $authSecret = $null }
     if ($web) {
         Write-Host 'Building the production website...' -ForegroundColor Cyan
         $previousNodeEnvironment = [Environment]::GetEnvironmentVariable('NODE_ENV', 'Process')
