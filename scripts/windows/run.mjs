@@ -12,7 +12,7 @@ export function supportedRuntime(version,component){
  if(!Number.isInteger(major)||major<22||major%2!==0)return false;
  return !includesWhatsApp(component)||(major===22&&(minor>22||minor===22&&patch>=2));
 }
-export function launchPlan(appRoot,component,{webPort=3000,host='127.0.0.1',serviceEnv={}}={}){
+export function launchPlan(appRoot,component,{webPort=3000,host='127.0.0.1',serviceEnv={},showWhatsAppBrowser=false}={}){
  if(!['Web','WhatsApp','Both'].includes(component))throw new Error('Choose Web, WhatsApp, or Both.');
  if(!validPort(webPort)||!['127.0.0.1','0.0.0.0','localhost'].includes(host))throw new Error('Invalid web port or bind address.');
  const plan=[];
@@ -20,7 +20,7 @@ export function launchPlan(appRoot,component,{webPort=3000,host='127.0.0.1',serv
  if(includesWhatsApp(component)){
   const port=Number(serviceEnv.PORT||8080);if(!validPort(port))throw new Error('Set a valid PORT (1024-65534) in services/openwa/.env.');
   if(!serviceEnv.OPENWA_API_KEY||serviceEnv.OPENWA_API_KEY.length<24)throw new Error('Configure OPENWA_API_KEY in services/openwa/.env (at least 24 characters).');
-  plan.push({name:'WhatsApp',cwd:path.join(appRoot,'services/openwa'),args:['--env-file-if-exists=.env',path.join(appRoot,'services/openwa/start.mjs')],ports:[{port,host:'127.0.0.1'},{port:port+1,host:'127.0.0.1'}],env:{}});
+  plan.push({name:'WhatsApp',cwd:path.join(appRoot,'services/openwa'),args:['--env-file-if-exists=.env',path.join(appRoot,'services/openwa/start.mjs')],ports:[{port,host:'127.0.0.1'},{port:port+1,host:'127.0.0.1'}],env:showWhatsAppBrowser?{WA_HEADLESS:'false'}:{}});
  }
  const ports=plan.flatMap(p=>p.ports.map(v=>v.port));if(new Set(ports).size!==ports.length)throw new Error('Web and WhatsApp ports conflict. WhatsApp also uses its PORT+1.');
  return plan;
@@ -33,7 +33,7 @@ export function requireFiles(appRoot,component){
 }
 function portAvailable({port,host}){return new Promise((resolve,reject)=>{const server=net.createServer();server.once('error',()=>reject(new Error(`Port ${port} is already in use or unavailable. No existing process was stopped.`)));server.listen({port,host,exclusive:true},()=>server.close(error=>error?reject(error):resolve()));});}
 async function main(){
- const component=process.argv[2],args=process.argv.slice(3),check=args.includes('--check');
+ const component=process.argv[2],args=process.argv.slice(3),check=args.includes('--check'),showWhatsAppBrowser=args.includes('--show-whatsapp-browser');
  if(!['Web','WhatsApp','Both'].includes(component))throw new Error('Choose Web, WhatsApp, or Both.');
  if(!supportedRuntime(process.versions.node,component))throw new Error('Use Node 22.22.2 or newer 22.x for WhatsApp; use a supported Node LTS >=22 for the web app.');
  requireFiles(root,component);
@@ -51,7 +51,8 @@ async function main(){
   if(result.status!==0)throw new Error('Missing web configuration. Set MONGODB_URI, NEXTAUTH_SECRET, SITE_URL and NEXTAUTH_URL in .env.local.');
   try{webConfig=JSON.parse(result.stdout);}catch{throw new Error('Unable to read web configuration.');}
  }
- const plan=launchPlan(root,component,{webPort,host,serviceEnv});
+ if(showWhatsAppBrowser&&!includesWhatsApp(component))throw new Error('--show-whatsapp-browser requires WhatsApp or Both.');
+ const plan=launchPlan(root,component,{webPort,host,serviceEnv,showWhatsAppBrowser});
  if(component==='Both'&&(webConfig.key!==serviceEnv.OPENWA_API_KEY||webConfig.url?.replace(/\/$/,'')!==`http://127.0.0.1:${Number(serviceEnv.PORT||8080)}`))throw new Error('The app and local WhatsApp configuration do not match. Check OPENWA_API_URL and OPENWA_API_KEY in both environment files or saved dashboard settings.');
  if(check){console.log(`Configuration and dependencies are ready for: ${plan.map(p=>p.name).join(' + ')}. No service was started or port reserved.`);return;}
  for(const item of plan)for(const port of item.ports)await portAvailable(port);

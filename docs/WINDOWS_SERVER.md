@@ -85,6 +85,9 @@ Or skip the menu:
 # WhatsApp only
 .\start-windows.ps1 -Component WhatsApp
 
+# Troubleshoot WhatsApp startup with a visible Chrome window
+.\start-windows.ps1 -Component WhatsApp -ShowWhatsAppBrowser
+
 # Both together
 .\start-windows.ps1 -Component Both
 
@@ -93,6 +96,8 @@ Or skip the menu:
 ```
 
 `-Check` does not bind ports or test database credentials, external connectivity, Chromium startup, or WhatsApp pairing. A running service is not proof that WhatsApp is paired; use the dashboard connection page.
+
+`-ShowWhatsAppBrowser` is a troubleshooting option for a WhatsApp page that reloads or hangs before QR generation. It runs Chrome visibly for that launch; the service still prints the QR in the terminal when OpenWA detects one. Stop any other OpenWA instance first and do not run two processes against the same profile.
 
 Before launching, the script checks the relevant build/dependencies, required configuration, Node compatibility and port availability. It never terminates a process already using a port. It launches Node directly with argument arrays, so repository paths containing spaces work and API keys are not passed as command-line arguments.
 
