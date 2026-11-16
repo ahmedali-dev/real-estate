@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createHash } from "node:crypto";
 import { createSHA256 } from "hash-wasm";
-import { localVideoEnabled, signVideo, readVideo, validVideoReceipt } from "../lib/local-video";
+import { localVideoEnabled, signVideo, readVideo, validVideoReceipt, completedVideoReference } from "../lib/local-video";
 import { propertyInputSchema } from "../lib/validations/property";
 
 test("video upload is disabled on public hosts and in production", () => {
@@ -17,6 +17,10 @@ test("only signed completion receipts can be saved with listings", () => {
     const receipt = signVideo({ kind: "complete", storedAs: "video-id.mp4", filename: "home.mp4", size: 123 });
     assert.equal(validVideoReceipt(receipt), true);
     assert.equal(readVideo(receipt).filename, "home.mp4");
+    const downloadable = signVideo({ kind: "complete", uploadId: "a".repeat(32), backend: "b".repeat(64), storedAs: "video-id.mp4", filename: "home.mp4", size: 123 });
+    assert.deepEqual(completedVideoReference(downloadable), { uploadId: "a".repeat(32), backend: "b".repeat(64), filename: "home.mp4", size: 123 });
+    assert.equal(completedVideoReference(receipt), null);
+    assert.equal(completedVideoReference(signVideo({ kind: "complete", uploadId: "../bad", backend: "b".repeat(64), filename: "../home.mp4", size: 123 })), null);
     assert.equal(validVideoReceipt(receipt + "x"), false);
     assert.equal(validVideoReceipt(signVideo({ kind: "upload", id: "a".repeat(32) })), false);
     const base = { title: "Test home", category: "apartment", listingType: "sale", description: "A test property description" };

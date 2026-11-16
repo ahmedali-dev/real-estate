@@ -118,9 +118,9 @@ An explicit web binding is available when needed:
 
 The WhatsApp gateway and its upstream remain bound to loopback. If WhatsApp is on a separate server from the website, configure an authenticated HTTPS reverse proxy for the gateway and enter that public gateway URL and matching API key in **Dashboard → WhatsApp settings**. Do not expose the internal upstream port.
 
-Open `/dashboard/whatsapp` on the website, check the server URL/API key, then scan the QR code. Settings already saved in the application's database take precedence over environment defaults: update those saved settings if the previous deployment used another gateway. Review `WHATSAPP_WEBHOOK_URL` in the service `.env` when moving domains; existing values are preserved.
+Open `/dashboard/whatsapp` on the website and check the server URL/API key. Pair WhatsApp by scanning the QR shown in the OpenWA service terminal; the dashboard polls the live connection state. Settings already saved in the application's database take precedence over environment defaults: update those saved settings if the previous deployment used another gateway. Review `WHATSAPP_WEBHOOK_URL` in the service `.env` when moving domains; existing values are preserved.
 
-The browser profile under `_IGNORE_property-office-user` is persistent authentication state. Keep it private and retain it across deployments; do not run two WhatsApp processes against the same profile.
+The browser profile under `services/openwa/_IGNORE_property-office-user-v5-10` is persistent authentication state. Keep it private and retain it across deployments; do not run two WhatsApp processes against the same profile. The earlier `_IGNORE_property-office-user` profile is preserved for rollback; set `WA_USER_DATA_DIR` to that path if you need to reuse it.
 
 For an initial administrator on a new database, use the existing `npm run create-admin` workflow described in the README. Setup intentionally does not invoke it or reset existing users.
 
@@ -200,15 +200,15 @@ Use the **project gateway**, which exposes `/office/connection` and protects QR/
    ```
 
 4. Save the tunnel's HTTPS origin (no `/health` or other path) in the website's **WhatsApp settings**, together with the same `OPENWA_API_KEY` used by the service. Existing dashboard settings take precedence over environment defaults.
-5. Refresh the connection on `/dashboard/whatsapp` and scan the QR there.
+5. Scan the QR in the OpenWA service terminal. Refresh `/dashboard/whatsapp` to check its connection state.
 
 The default gateway is **8080**; **8081** is its internal upstream. If you change service `PORT`, tunnel that value, never `PORT + 1`. A healthy `/health` on the wrong port does not prove the gateway exists or that WhatsApp is connected. If `/office/connection` returns 404, check both the tunnel target and that you launched this repository's wrapper rather than a standalone OpenWA CLI. The startup log now prints the correct gateway port.
 
-The app's server-side health, readiness, group and send requests include `Accept: application/json`, `X-API-Key`, and `ngrok-skip-browser-warning: 1`. This uses ngrok's documented client-header mechanism while keeping API authentication in place. An ordinary browser visit to the tunnel can still show ngrok's free-tier interstitial because address-bar navigation does not add this header. View the QR through the protected website dashboard rather than the tunnel root. See [ngrok free-plan interstitial documentation](https://ngrok.com/docs/pricing-limits/free-plan-limits).
+The app's server-side health, readiness, group and send requests include `Accept: application/json`, `X-API-Key`, and `ngrok-skip-browser-warning: 1`. This uses ngrok's documented client-header mechanism while keeping API authentication in place. An ordinary browser visit to the tunnel can still show ngrok's free-tier interstitial because address-bar navigation does not add this header. The QR is shown only in the local service terminal; never expose OpenWA's health endpoint publicly. See [ngrok free-plan interstitial documentation](https://ngrok.com/docs/pricing-limits/free-plan-limits).
 
 The service captures OpenWA's generated QR from its CLI output and exposes it only through the authenticated `/office/connection` gateway. After updating the service, restart it and keep ngrok pointed at the gateway port. The app can then show the QR even when OpenWA's `/health` response has `qr: null`.
 
-The dashboard distinguishes a missing gateway, rejected API key, an HTML response and an unreachable service. This transport change does not reset the WhatsApp session or guarantee Chromium can start; if the correct gateway is reachable but pairing stays blocked, inspect the service terminal for its actual startup error. Update/redeploy the web application for the header handling and clearer dashboard errors to take effect.
+The dashboard distinguishes a missing gateway, rejected API key, an HTML response and an unreachable service, then checks OpenWA's `READY` state. Login is handled only in the OpenWA service terminal. If the service is reachable but never becomes ready, inspect that terminal for startup or pairing errors. Update the website and service folder to use this flow.
 
 ### Saved WhatsApp key cannot decrypt (`Unsupported state or unable to authenticate data`)
 

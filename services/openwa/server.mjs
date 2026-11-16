@@ -1,5 +1,6 @@
 import http from 'node:http';
-import { getCliOutputSink, setCliOutputSink, startCli, parseCliArgs } from '@open-wa/wa-automate';
+import { startCli, parseCliArgs } from '@open-wa/wa-automate';
+import { openwaConnectionSnapshot } from './connection-state.mjs';
 
 // Register the gateway before OpenWA waits for pairing. Its Hono router is
 // finalized on the first request, so routes added after startup are unreliable.
@@ -9,24 +10,11 @@ const publicPort = Number(portIndex >= 0 ? args[portIndex + 1] : 8080);
 const upstreamPort = publicPort + 1;
 if (portIndex >= 0) args[portIndex + 1] = String(upstreamPort);
 else args.push('--port', String(upstreamPort));
+const cliConfig = parseCliArgs(args);
+// Keep terminal login visible even if a stale config or env-derived value
+// tries to suppress the CLI's QR renderer.
+cliConfig.cliOverrides.qrLogSkip = false;
 let runtime;
-// OpenWA 5.1 emits its pairing string during startup (and prints it to the
-// local terminal). Keep a private copy so the authenticated website gateway
-// can render it even when /health omits the QR field.
-let pairingQr = null;
-const consoleSink = getCliOutputSink();
-setCliOutputSink({
-  write(entry) { consoleSink.write(entry); },
-  status(update) {
-    if (update.phase === 'client.ready') pairingQr = null;
-    consoleSink.status(update);
-  },
-  qr(payload) {
-    const value = payload?.qr;
-    pairingQr = typeof value === 'string' && value.length <= 8192 ? value : null;
-    consoleSink.qr(payload);
-  },
-});
 const webhookStatus = { enabled: false, received: 0, forwarded: 0, ignored: 0, lastResult: null };
 const gateway = http.createServer(async (request, response) => {
   // Protect every route, including health/QR data, before proxying upstream.
@@ -46,15 +34,9 @@ const gateway = http.createServer(async (request, response) => {
       response.writeHead(401); response.end(JSON.stringify({ connected: false })); return;
     }
     try {
-      const connected = runtime ? await runtime.client.evaluate(() => {
-        const pairing = document.querySelector('[data-testid="qrcode"], canvas[aria-label*="Scan"], [data-ref] canvas');
-        const chats = document.querySelector('#pane-side, [data-testid="chat-list"], [data-testid="chat-list-pane"]');
-        const offline = document.querySelector('[data-testid="alert-phone"], [data-testid="alert-computer"]');
-        return Boolean(chats && !pairing && !offline);
-      }, undefined) : false;
-      const isConnected = connected === true;
-      response.end(JSON.stringify({ connected: isConnected, qr: isConnected ? null : pairingQr }));
-    } catch { response.end(JSON.stringify({ connected: false, qr: pairingQr })); }
+      // Avoid inspecting WhatsApp Web's private DOM; use OpenWA's runtime state.
+      response.end(JSON.stringify(openwaConnectionSnapshot(runtime)));
+    } catch { response.end(JSON.stringify({ connected: false, state: 'DISCONNECTED' })); }
     return;
   }
   const upstream = http.request({ hostname: '127.0.0.1', port: upstreamPort, path: request.url, method: request.method, headers: request.headers }, result => {
@@ -69,6 +51,8 @@ await new Promise((resolve, reject) => {
   gateway.listen(publicPort, '127.0.0.1', resolve);
 });
 console.log(`Office connection gateway ready: http://127.0.0.1:${publicPort}. Point ngrok at this port; the internal API uses ${upstreamPort}.`);
+console.log('WhatsApp login runs in this terminal. Scan its QR from WhatsApp → Linked devices when requested.');
+console.log('OpenWA terminal QR output is enabled.');
 let messagePoll;
 let stopping = false;
 async function stop() {
@@ -81,7 +65,14 @@ async function stop() {
 }
 process.on('SIGTERM', stop);
 process.on('SIGINT', stop);
-try { runtime = await startCli(parseCliArgs(args)); }
+try {
+  runtime = await startCli(cliConfig);
+  let state = 'UNKNOWN';
+  try { state = runtime.client.getState(); } catch { /* The dashboard continues polling until state is readable. */ }
+  console.log(`WhatsApp runtime state: ${state}.`);
+  if (state === 'READY') console.log('WhatsApp is already connected; no QR code is needed.');
+  else console.log('Waiting for WhatsApp login. Scan the QR in this terminal when it appears.');
+}
 catch { console.error('OpenWA startup failed. Restart the service to try again.'); gateway.close(); process.exitCode = 1; }
 
 if (runtime) {

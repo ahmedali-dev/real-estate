@@ -4,16 +4,16 @@ import { WhatsAppSettings } from "./WhatsAppSettings";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
-type Connection = { status: "loading" | "setup" | "offline" | "waiting" | "pairing" | "connected" | "licenseInvalid" | "blocked" | "gatewayMissing" | "authError" | "tunnelPage" | "credentialsInvalid"; qr: string | null };
+type Connection = { status: "loading" | "setup" | "offline" | "waiting" | "connected" | "licenseInvalid" | "blocked" | "gatewayMissing" | "authError" | "tunnelPage" | "credentialsInvalid" };
 export function WhatsAppConnection() {
   const { t } = useLanguage();
-  const [connection, setConnection] = useState<Connection>({ status: "loading", qr: null });
+  const [connection, setConnection] = useState<Connection>({ status: "loading" });
   const [refresh, setRefresh] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout>;
     async function poll() {
-      let next: Connection = { status: "offline", qr: null };
+      let next: Connection = { status: "offline" };
       try {
         const response = await fetch("/api/whatsapp/connection", { cache: "no-store", signal: controller.signal });
         if (response.ok) next = await response.json();
@@ -21,7 +21,7 @@ export function WhatsAppConnection() {
       } catch { if (controller.signal.aborted) return; }
       if (controller.signal.aborted) return;
       setConnection(next);
-      timer = setTimeout(poll, next.status === "pairing" || next.status === "waiting" ? 5000 : 15000);
+      timer = setTimeout(poll, next.status === "waiting" ? 5000 : 15000);
     }
     poll();
     return () => { controller.abort(); clearTimeout(timer); };
@@ -33,11 +33,7 @@ export function WhatsAppConnection() {
     <WhatsAppSettings onSaved={() => setRefresh(value => value + 1)} />
     <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-6">
       <p role="status" className="font-semibold text-ink-800">{t(`whatsappConnection.${connection.status}`)}</p>
-      {connection.status === "pairing" && connection.qr && <>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={connection.qr} alt={t("whatsappConnection.qrAlt")} width={320} height={320} className="mx-auto mt-4 h-auto max-w-full rounded-xl bg-white" />
-        <p className="mt-4 text-center text-sm text-ink-600">{t("whatsappConnection.scan")}</p>
-      </>}
+      {connection.status === "waiting" && <div className="mt-4 rounded-xl bg-stone-50 p-4 text-sm text-ink-600"><p>{t("whatsappConnection.terminalPairing")}</p><p className="mt-2">{t("whatsappConnection.scan")}</p></div>}
       {connection.status==="gatewayMissing"&&<div className="mt-4 rounded-xl bg-stone-50 p-4 text-sm text-ink-600"><p>{t("whatsappConnection.gatewayHelp")}</p><code dir="ltr" className="mt-2 block select-all">ngrok http http://127.0.0.1:8080</code></div>}
       {connection.status === "licenseInvalid" && <p className="mt-4 text-sm text-ink-600">{t("whatsappConnection.fixLicense")}</p>}
       {(connection.status === "offline" || connection.status === "setup") && <div className="mt-4 rounded-xl bg-stone-50 p-4 text-sm text-ink-600">

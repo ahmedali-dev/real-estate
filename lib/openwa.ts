@@ -1,8 +1,8 @@
 import { openwaRequestHeaders } from "./openwa-http";
 import { openwaAccountAvailable } from "./openwa-status";
 import type { PropertyDTO } from "@/types/property";
-import { propertyTextMessage } from "./property-message";
-export { propertyTextMessage } from "./property-message";
+import { propertyTextMessage, propertyVideoCaption } from "./property-message";
+export { propertyTextMessage, propertyVideoCaption } from "./property-message";
 
 export function openwaConfig() {
   try {
@@ -46,4 +46,26 @@ async function sendRequest(config: NonNullable<ReturnType<typeof openwaConfig>>,
 
 export async function sendPropertyOpenwa(config: NonNullable<ReturnType<typeof openwaConfig>>, to: string, property: PropertyDTO, origin: string, locale: "en" | "ar", fetcher = fetch) {
   return sendOpenwa(config, to, propertyTextMessage(property, origin, locale), fetcher);
+}
+
+export async function sendPropertyVideoOpenwa(config: NonNullable<ReturnType<typeof openwaConfig>>, to: string, property: PropertyDTO, origin: string, locale: "en" | "ar", videoUrl: string, filename: string, fetcher = fetch) {
+  if (!await openwaAccountAvailable(config, fetcher)) throw new OpenwaSendError("openwaNotReady");
+  const response = await fetcher(`${config.url}/api/messages/sendFile`, {
+    method: "POST", headers: openwaRequestHeaders(config.key, { "Content-Type": "application/json" }),
+    body: JSON.stringify({ to, file: videoUrl, filename, options: { type: "video", caption: propertyVideoCaption(property, origin, locale) } }),
+    redirect: "error", signal: AbortSignal.timeout(120000),
+  });
+  const result: unknown = await response.json();
+  const data = result && typeof result === "object" ? result as Record<string, unknown> : {};
+  if (!response.ok || data.success === false || data.error) {
+    const reason = JSON.stringify({ error: data.error, details: data.details });
+    if (/license|licensed|insiders|premium/i.test(reason)) throw new OpenwaSendError("openwaLicense");
+    if (response.status === 401) throw new OpenwaSendError("openwaAuth");
+    if (response.status === 503) throw new OpenwaSendError("openwaNotReady");
+    throw new Error("OpenWA rejected the video.");
+  }
+  const sent = data.data;
+  const messageId = sent && typeof sent === "object" ? (sent as Record<string, unknown>)._serialized : sent;
+  if (typeof messageId !== "string" || !/^(true|false)_[^_]+_.+/.test(messageId)) throw new Error("OpenWA did not confirm the video send operation.");
+  return messageId;
 }

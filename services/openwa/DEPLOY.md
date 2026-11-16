@@ -42,9 +42,9 @@ Use your normal certificate provisioning and firewall configuration. No inbound 
 2. Set WhatsApp server URL to `https://whatsapp.example.com`.
 3. Enter the same API key as the service's `.env`.
 4. Set the public property website URL and automatic reply language.
-5. Save, check connection, and scan the pairing QR with WhatsApp → Linked devices.
+5. Keep the service terminal open. Scan its QR from WhatsApp → Linked devices, then check the status in the website dashboard.
 
-The gateway captures the OpenWA CLI's generated pairing QR and serves it through authenticated `GET /office/connection`; this lets the website display the QR even if `/health` reports `qr: null`. Restart the service after updating this folder, and keep the ngrok or HTTPS reverse proxy pointed at the gateway port (8080 by default), not the internal OpenWA port (8081).
+Login is performed in the OpenWA service terminal. The authenticated `GET /office/connection` route reports whether the OpenWA v5 runtime reached `READY`; it does not expose or proxy the QR. Restart the service after updating this folder, and keep the ngrok or HTTPS reverse proxy pointed at the gateway port (8080 by default), not the internal OpenWA port (8081).
 
 Settings are stored in MongoDB. The API key is encrypted using the website's NEXTAUTH_SECRET; preserve that secret or re-enter the key after changing it. The key is never returned to the browser by the settings API. Existing environment settings remain the fallback until admin settings are saved.
 

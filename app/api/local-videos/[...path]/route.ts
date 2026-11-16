@@ -53,7 +53,7 @@ async function handle(req: NextRequest, context: { params: Promise<{ path: strin
     if (endpoint === "/uploads") output.ticket = signVideo({ ...ticket, id: data.upload_id });
     if (path[2] === "complete") {
       if (data.status !== "complete" || data.offset !== ticket!.size || typeof data.stored_as !== "string" || data.stored_as.length > 512 || /[\\/\u0000-\u001f]/.test(data.stored_as)) return json({ error: "The server did not confirm a completed video." }, 502);
-      output.receipt = signVideo({ kind: "complete", filename: ticket!.filename, size: ticket!.size, storedAs: data.stored_as, sha256: ticket!.sha256 });
+      output.receipt = signVideo({ kind: "complete", uploadId: path[1], backend: ticket!.backend, filename: ticket!.filename, size: ticket!.size, storedAs: data.stored_as, sha256: ticket!.sha256 });
     }
     return json(output, result.status);
   } catch { return json({ error: "Video server unavailable. Check VIDEO_UPLOAD_API_URL and resume the upload." }, 502); }

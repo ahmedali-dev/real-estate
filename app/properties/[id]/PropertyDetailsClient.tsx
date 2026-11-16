@@ -511,6 +511,13 @@ export default function PropertyDetailsClient({ publicOrigin, initialProperty }:
             <a href={property.tiktokUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-ink-600 hover:underline"><Icon name="tiktok" className="h-5 w-5" />{t("property.watchOnTikTok")}</a>
             <CopyButton label={t("property.copyTikTok")} text={property.tiktokUrl} />
           </div>}
+          {canQuickEdit && property.localVideo && <section className="mt-6 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5" aria-labelledby="property-uploaded-video">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><h2 id="property-uploaded-video" className="flex items-center gap-2 font-display text-lg font-semibold text-ink-800"><Icon name="video" className="h-5 w-5 text-moss-600" />{locale === "ar" ? "فيديو العقار المرفوع" : "Uploaded property video"}</h2><a href={`/api/properties/${property._id}/video?disposition=attachment`} className="btn-secondary"><Icon name="download" className="h-4 w-4" />{t("property.downloadVideo")}</a></div>
+            <video className="max-h-[70vh] w-full rounded-xl bg-ink-900" controls preload="metadata" playsInline src={`/api/properties/${property._id}/video?disposition=inline`}>
+              {locale === "ar" ? "المتصفح لا يدعم تشغيل الفيديو." : "Your browser does not support video playback."}
+            </video>
+            <p className="mt-2 text-xs text-ink-500">{locale === "ar" ? "يمكنك اختيار إرفاق الفيديو عند الإرسال من واتساب المكتب." : "Choose “Attach the property video” in the office WhatsApp form to send it as media."}</p>
+          </section>}
         </div>
       </div>
       <dialog ref={galleryDialog} className="editorial-lightbox" aria-label={t("property.viewFullImage")}>

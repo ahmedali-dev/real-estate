@@ -31,3 +31,14 @@ export function propertyTextMessage(property: PropertyDTO, origin: string, local
   ].join("\n");
 }
 
+/** Short media caption that fits WhatsApp's caption field and excludes staff-only data. */
+export function propertyVideoCaption(property: PropertyDTO, origin: string, locale: "en" | "ar") {
+  const words = translations[locale];
+  const labels: Record<string, string> = {
+    "common.sar": words.common.sar, "property.priceOnRequest": words.property.priceOnRequest,
+    "form.monthly": words.form.monthly, "form.yearly": words.form.yearly,
+  };
+  const price = formatPriceWithPeriod(property.price, property.listingType, property.rentalPeriod, key => labels[key] || key, locale);
+  return [`*${property.title}*`, `${words.property.price}: ${price}`, `${origin}/properties/${property._id}`].join("\n").slice(0, 1024);
+}
+

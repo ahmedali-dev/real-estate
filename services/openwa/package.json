@@ -3,12 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "dependencies": {
-    "@open-wa/wa-automate": "5.1.0"
-  },
-  "overrides": {
-    "effect": "4.0.0-beta.100",
-    "@effect/platform-node": "4.0.0-beta.100",
-    "@effect/platform-node-shared": "4.0.0-beta.100"
+    "@open-wa/wa-automate": "5.10.0"
   },
   "scripts": {
     "start": "node --env-file-if-exists=.env start.mjs",

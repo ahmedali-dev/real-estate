@@ -32,3 +32,10 @@ export function validVideoReceipt(token: string) {
   try { const value = readVideo(token); return value.kind === "complete" && typeof value.storedAs === "string" && typeof value.filename === "string" && typeof value.size === "number"; }
   catch { return false; }
 }
+export function completedVideoReference(token: string) {
+  try {
+    const value = readVideo(token);
+    if (value.kind !== "complete" || typeof value.uploadId !== "string" || !/^[a-f0-9]{32}$/.test(value.uploadId) || typeof value.backend !== "string" || !/^[a-f0-9]{64}$/.test(value.backend) || typeof value.filename !== "string" || !/^[^\\/\u0000-\u001f]{1,255}$/.test(value.filename) || !Number.isSafeInteger(value.size) || Number(value.size) <= 0) return null;
+    return { uploadId: value.uploadId, backend: value.backend, filename: value.filename, size: Number(value.size) };
+  } catch { return null; }
+}

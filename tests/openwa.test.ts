@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { whatsappRecipient } from "../lib/property-share";
-import { propertyTextMessage, sendOpenwa, sendPropertyOpenwa, openwaConfig, OpenwaSendError } from "../lib/openwa";
+import { propertyTextMessage, propertyVideoCaption, sendOpenwa, sendPropertyOpenwa, sendPropertyVideoOpenwa, openwaConfig, OpenwaSendError } from "../lib/openwa";
 import type { PropertyDTO } from "../types/property";
 
 const property: PropertyDTO = {
@@ -36,6 +36,20 @@ test("property send uses text only even when the listing has images", async () =
     return Response.json({ data: "false_966501234567@c.us_text" });
   });
   assert.equal(calls, 1);
+});
+
+test("uploaded property videos use OpenWA sendFile with a private-data-free caption", async () => {
+  const listing = { ...property, description: "Secret long description", tiktokUrl: "https://tiktok.com/video/1" };
+  let calls = 0;
+  await sendPropertyVideoOpenwa(config, "966501234567@c.us", listing, "https://example.com", "en", "https://example.com/api/property-video/signed-token", "home.mp4", async (url, options) => {
+    if (String(url).endsWith("/office/connection")) return Response.json({ connected: true });
+    calls++;
+    assert.equal(url, "https://wa.example/api/messages/sendFile");
+    assert.deepEqual(JSON.parse(options?.body as string), { to: "966501234567@c.us", file: "https://example.com/api/property-video/signed-token", filename: "home.mp4", options: { type: "video", caption: propertyVideoCaption(listing, "https://example.com", "en") } });
+    return Response.json({ success: true, data: "false_966501234567@c.us_media" });
+  });
+  assert.equal(calls, 1);
+  assert.doesNotMatch(propertyVideoCaption(listing, "https://example.com", "en"), /Secret|Private|tiktok/);
 });
 
 test("license failures return an actionable code without exposing provider details", async () => {

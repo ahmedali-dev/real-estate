@@ -2,7 +2,7 @@
 
 For a standalone server installation, upload this folder and follow **[DEPLOY.md](DEPLOY.md)**. Configure the website connection in **Dashboard → WhatsApp → WhatsApp server settings**.
 
-The app uses `POST /api/messages/sendText` to send the saved public listing title, category, listing type, availability, formatted price, room details, full description, property URL, Google Maps URL and TikTok video link. Arabic/English labels are chosen before sending; saved titles/descriptions are not automatically translated. Images are excluded from WhatsApp messages. It does not use paid interactive buttons. Owner and tenant details are excluded. The service config ignores license keys so an invalid paid key cannot block free startup.
+The app uses `POST /api/messages/sendText` to send the saved public listing title, category, listing type, availability, formatted price, room details, full description, property URL, Google Maps URL and TikTok video link. Staff can optionally send an uploaded listing video using `POST /api/messages/sendFile`; OpenWA fetches a short-lived signed URL from the website. Arabic/English labels are chosen before sending; saved titles/descriptions are not automatically translated. Listing images are excluded from WhatsApp messages. It does not use paid interactive buttons. Owner and tenant details are excluded. The service config ignores license keys so an invalid paid key cannot block free startup.
 
 ## Local setup
 
@@ -13,9 +13,9 @@ npm run openwa:setup
 npm run openwa:start
 ```
 
-Setup generates missing `OPENWA_API_URL` and `OPENWA_API_KEY` settings in ignored `.env.local`, preserving existing values. Startup loads `.env` and `.env.local`, installs isolated dependencies on first run, and runs OpenWA under Node 22.22.2. Compatible Effect packages are pinned in the service package.
+Setup generates missing `OPENWA_API_URL` and `OPENWA_API_KEY` settings in ignored `.env.local`, preserving existing values. Startup loads `.env` and `.env.local`, installs isolated dependencies on first run, and runs OpenWA 5.10.0 under Node 22.22.2. The previous 5.1 browser profile is preserved; the new profile path is used by default to avoid stale WhatsApp Web authentication state. Set `WA_USER_DATA_DIR` to reuse a different private profile.
 
-If an old service is running, stop it with Ctrl+C first. Keep the new terminal open. Sign in as admin at `http://localhost:3000/dashboard/whatsapp` and scan the QR using WhatsApp → Linked devices. Existing authenticated browser profiles are preserved.
+If an old service is running, stop it with Ctrl+C first. Keep the new terminal open. OpenWA prints the login QR in that terminal. Scan it using WhatsApp → Linked devices. Then open `/dashboard/whatsapp` in the website to see whether the session is ready. The dashboard does not display or proxy the QR. Existing authenticated browser profiles are preserved.
 
 ## Sending
 
@@ -25,7 +25,7 @@ Listing staff can open a public property and use **Send from office WhatsApp**. 
 
 Run OpenWA on a persistent browser host, separate from the website. Set `OPENWA_API_URL` to an authenticated HTTPS gateway and `OPENWA_API_KEY` to the matching secret on the website server. Also configure `SITE_URL` to the public property website.
 
-Forward `POST /api/messages/sendText`; if pairing remotely, also forward `GET /health` with gateway-enforced API-key authentication. OpenWA's own health route is public and contains pairing data, so never expose it without gateway authentication. The app's pairing endpoint is admin-only and returns only the QR image and sanitized status.
+Forward `POST /api/messages/sendText` and the authenticated `/office/connection` route. Pair by scanning the QR shown in the OpenWA service terminal. The website checks the OpenWA v5 `READY` state and does not show or proxy the QR. OpenWA's own health route can contain pairing data, so never expose it without gateway-enforced API-key authentication.
 
 OpenWA is unofficial WhatsApp automation; account restrictions remain possible. References: [API methods](https://openwa.dev/docs/reference/client/messages), [setup](https://openwa.dev/docs/getting-started/easy-api).
 
