@@ -24,6 +24,11 @@ export function appendMissing(file,entries,effective,expand=false){
  if(!additions.length)return;
  fs.appendFileSync(file,'\n# Windows Server setup\n'+additions.join('\n')+'\n',{encoding:'utf8',mode:0o600});
 }
+function replaceEnvValue(file,key,value){
+ const contents=fs.readFileSync(file,'utf8'),pattern=new RegExp(`^\\s*${key}\\s*=.*$`,'m');
+ if(!pattern.test(contents))return;
+ fs.writeFileSync(file,contents.replace(pattern,envLine(key,value)),{encoding:'utf8',mode:0o600});
+}
 export function configure(appRoot,input,webConfig={}){
  const component=input.component;if(!['Web','WhatsApp','Both'].includes(component))throw new WindowsSetupError('Choose Web, WhatsApp, or Both.');
  const web=includesWeb(component),whatsapp=includesWhatsApp(component),settingsFile=path.join(appRoot,'.windows-server.json');
@@ -48,7 +53,12 @@ export function configure(appRoot,input,webConfig={}){
   appendMissing(path.join(appRoot,'.env.local'),{MONGODB_URI:mongodb,NEXTAUTH_SECRET:input.authSecret||crypto.randomBytes(32).toString('hex'),SITE_URL:site,NEXTAUTH_URL:site,CLOUDINARY_URL:input.cloudinaryUrl,...(whatsapp?{OPENWA_API_URL:`http://127.0.0.1:${servicePort}`,OPENWA_API_KEY:key}:{})},webConfig,true);
   fs.writeFileSync(settingsFile,JSON.stringify({webPort},null,2)+'\n',{mode:0o600});
  }
- if(whatsapp)appendMissing(serviceFile,{OPENWA_API_KEY:key,PORT:servicePort,WA_USER_DATA_DIR:'./_IGNORE_property-office-user',WHATSAPP_WEBHOOK_URL:(web?`http://127.0.0.1:${webPort}`:site)+'/api/webhooks/whatsapp'},service);
+ if(whatsapp){
+  const currentProfile=service.WA_USER_DATA_DIR,defaultProfile='./_IGNORE_property-office-user-v5-10';
+  // Migrate only the previous setup-generated default; preserve custom profile paths.
+  if(currentProfile==='./_IGNORE_property-office-user'||currentProfile==='./_IGNORE_property-office')replaceEnvValue(serviceFile,'WA_USER_DATA_DIR',defaultProfile);
+  appendMissing(serviceFile,{OPENWA_API_KEY:key,PORT:servicePort,WA_USER_DATA_DIR:defaultProfile,WHATSAPP_WEBHOOK_URL:(web?`http://127.0.0.1:${webPort}`:site)+'/api/webhooks/whatsapp'},service);
+ }
  return {webPort,site,whatsappPort:servicePort};
 }
 async function main(){

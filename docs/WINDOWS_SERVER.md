@@ -120,7 +120,7 @@ The WhatsApp gateway and its upstream remain bound to loopback. If WhatsApp is o
 
 Open `/dashboard/whatsapp` on the website and check the server URL/API key. Pair WhatsApp by scanning the QR shown in the OpenWA service terminal; the dashboard polls the live connection state. Settings already saved in the application's database take precedence over environment defaults: update those saved settings if the previous deployment used another gateway. Review `WHATSAPP_WEBHOOK_URL` in the service `.env` when moving domains; existing values are preserved.
 
-The browser profile under `services/openwa/_IGNORE_property-office-user-v5-10` is persistent authentication state. Keep it private and retain it across deployments; do not run two WhatsApp processes against the same profile. The earlier `_IGNORE_property-office-user` profile is preserved for rollback; set `WA_USER_DATA_DIR` to that path if you need to reuse it.
+The browser profile under `services/openwa/_IGNORE_property-office-user-v5-10` is persistent authentication state. Keep it private and retain it across deployments; do not run two WhatsApp processes against the same profile. Setup migrates its old default path to this profile on the next run; custom `WA_USER_DATA_DIR` paths are preserved. The earlier `_IGNORE_property-office-user` profile is preserved for rollback; set `WA_USER_DATA_DIR` to that path if you need to reuse it.
 
 For an initial administrator on a new database, use the existing `npm run create-admin` workflow described in the README. Setup intentionally does not invoke it or reset existing users.
 

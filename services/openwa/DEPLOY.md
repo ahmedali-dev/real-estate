@@ -15,7 +15,7 @@ npm ci
 npm start
 ```
 
-Keep `.env` private. Preserve the `_IGNORE_property-office` directory across restarts; it contains the linked WhatsApp browser session. Do not upload local node_modules or an old session to a public repository.
+Keep `.env` private. Preserve the `_IGNORE_property-office-user-v5-10` directory across restarts; it contains the linked WhatsApp browser session. Do not upload local node_modules or an old session to a public repository.
 
 The gateway listens on **127.0.0.1:8080**; the internal OpenWA API uses port 8081. Set PORT to change both (the internal port is PORT + 1). Use a service manager such as systemd to keep `npm start` running, with this folder as WorkingDirectory and a non-root service account. Back up the session directory privately.
 
